@@ -1,0 +1,1164 @@
+<title>English Quest SMK</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Atkinson+Hyperlegible:wght@400;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one centered column like a work-order clipboard; each job world tints the screen with its own color */
+:root{
+  --bg:#E8EDF1; --surface:#FFFFFF; --surface2:#F3F6F8; --ink:#15202A; --muted:#566673; --line:#CBD4DC;
+  --good:#1D8A4C; --good-bg:#E3F4EA; --bad:#BC3A2C; --bad-bg:#FBE9E6; --gold:#C98E00;
+  --acc:#1E7A58; --tou:#2460C4; --mkt:#D2470C; --mplb:#5A47C2; --dkv:#B81A5C;
+  --w:var(--tou);
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E151B; --surface:#17212A; --surface2:#1E2A34; --ink:#E6EDF2; --muted:#97A7B3; --line:#2C3A46;
+  --good:#45C47C; --good-bg:#16301F; --bad:#F07264; --bad-bg:#3A1C19; --gold:#F5C043;
+  --acc:#3DBF8E; --tou:#6A9BF2; --mkt:#FF8044; --mplb:#9C8CF5; --dkv:#EE5D99; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E151B; --surface:#17212A; --surface2:#1E2A34; --ink:#E6EDF2; --muted:#97A7B3; --line:#2C3A46;
+  --good:#45C47C; --good-bg:#16301F; --bad:#F07264; --bad-bg:#3A1C19; --gold:#F5C043;
+  --acc:#3DBF8E; --tou:#6A9BF2; --mkt:#FF8044; --mplb:#9C8CF5; --dkv:#EE5D99; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:740px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid var(--w);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1;text-wrap:balance;letter-spacing:.01em}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;font-variant-numeric:tabular-nums}
+.chip b{color:var(--w)}
+.back{background:none;border:none;padding:6px 0;font-weight:700;color:var(--muted)}
+.back:hover{color:var(--ink)}
+
+.hero{display:flex;flex-direction:column;gap:10px;padding-top:8px}
+.hero h1{font-size:clamp(52px,14vw,96px);font-weight:900;text-transform:uppercase}
+.hero h1 span{display:block;color:var(--tou)}
+.hero p{margin:0;color:var(--muted);max-width:56ch}
+.stripe{height:10px;border-radius:2px;background:repeating-linear-gradient(-45deg,var(--gold) 0 14px,var(--ink) 14px 28px);opacity:.9}
+.worlds{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.worlds .world:nth-child(-n+2){grid-column:span 3}
+.worlds .world:nth-child(n+3){grid-column:span 2}
+@media (max-width:600px){.worlds{grid-template-columns:1fr}.worlds .world{grid-column:auto!important}}
+.world{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0;overflow:hidden;display:flex;flex-direction:column;transition:transform .15s,border-color .15s}
+.world:hover{transform:translateY(-2px);border-color:var(--w)}
+.world .top{background:var(--w);color:#fff;padding:16px 16px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex:1}
+.world .top > div{min-width:0}
+.world .top h2{font-size:32px;font-weight:800;text-transform:uppercase;margin-top:4px}
+.world .top .ico{font-size:36px;line-height:1}
+.world .top .mono{color:rgba(255,255,255,.88)}
+.world .body{padding:12px 16px 14px;display:flex;flex-direction:column;gap:8px}
+.world .body p{margin:0;color:var(--muted);font-size:14px}
+.meter{display:flex;gap:5px}
+.meter i{flex:1;height:8px;border-radius:2px;background:var(--surface2);border:1px solid var(--line)}
+.meter i.on{background:var(--w);border-color:var(--w)}
+.meter i.boss{flex:1.4}
+.legend{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+@media (max-width:600px){.legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.legend div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.legend strong{font-family:var(--f-display);font-size:22px;text-transform:uppercase}
+.legend span{font-size:13px;color:var(--muted)}
+.legend em{font-style:normal;font-size:13px;font-weight:700;color:var(--ink)}
+.rules{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.rules h3{font-size:22px;text-transform:uppercase;margin-bottom:8px}
+.rules ul{margin:0;padding-left:20px;color:var(--muted);font-size:15px;display:flex;flex-direction:column;gap:4px}
+.foot{font-size:13px;color:var(--muted);text-align:center;display:flex;flex-direction:column;gap:6px;align-items:center}
+.small-btn{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px}
+
+.whead{background:var(--w);color:#fff;border-radius:14px;padding:22px 20px;display:flex;flex-direction:column;gap:6px;position:relative;overflow:hidden}
+.whead h1{font-size:clamp(44px,11vw,72px);font-weight:900;text-transform:uppercase;padding-right:60px}
+.whead p{margin:0;opacity:.94;max-width:50ch}
+.whead .mono{color:rgba(255,255,255,.88)}
+.whead .big{position:absolute;right:14px;top:10px;font-size:64px;opacity:.3;pointer-events:none}
+.missions{display:flex;flex-direction:column;gap:12px}
+.mission{display:grid;grid-template-columns:64px 1fr auto;gap:14px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.mission:hover:not(:disabled){border-color:var(--w)}
+.mission:disabled{opacity:.55;cursor:not-allowed}
+.mission .lv{font-family:var(--f-display);font-weight:900;font-size:40px;color:var(--w);text-align:center;line-height:1}
+.mission .lv small{display:block;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.04em;font-weight:600;color:var(--muted);margin-top:4px}
+.mission h3{font-size:24px;text-transform:uppercase}
+.mission p{margin:2px 0 0;font-size:14px;color:var(--muted)}
+.mission .st{font-size:18px;letter-spacing:2px;white-space:nowrap;color:var(--gold)}
+.mission > div{min-width:0}
+.mission.boss{border:2px solid var(--w);background:linear-gradient(0deg,var(--surface),var(--surface)) padding-box}
+.mission.boss .lv{font-size:34px}
+
+.ticket{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.tk-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px dashed var(--line);background:var(--surface2);flex-wrap:wrap}
+.tk-b{padding:18px 16px 20px;display:flex;flex-direction:column;gap:16px}
+.stat{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-variant-numeric:tabular-nums;font-weight:700;font-size:15px}
+.hearts{letter-spacing:2px;color:var(--bad)}
+.hearts .lost{color:var(--line)}
+.timer{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.timer i{display:block;height:100%;background:var(--w);transition:width 1s linear}
+.timer.low i{background:var(--bad)}
+.task{font-weight:700;color:var(--muted);font-size:15px;margin:0}
+.say{display:flex;gap:12px;align-items:flex-start;background:var(--surface2);border-left:5px solid var(--w);border-radius:8px;padding:14px}
+.say .who{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--w);font-weight:600}
+.say .en{font-size:clamp(20px,5vw,26px);font-weight:700;line-height:1.3}
+.say .tr{color:var(--muted);font-size:15px;margin-top:4px;font-style:italic}
+.say > div{flex:1;min-width:0}
+.speak{flex:none;width:46px;height:46px;border-radius:50%;border:2px solid var(--w);background:var(--surface);font-size:20px;display:grid;place-items:center}
+.speak:hover{background:var(--w)}
+.listen{display:flex;flex-direction:column;align-items:center;gap:10px;background:var(--surface2);border-radius:12px;padding:20px 14px;border:2px dashed var(--w)}
+.listen .speak{width:72px;height:72px;font-size:32px}
+.listen .hidden-text{font-size:22px;font-weight:700;text-align:center}
+.trbtn{align-self:flex-start;background:none;border:1px dashed var(--line);border-radius:8px;padding:6px 12px;font-size:14px;color:var(--muted)}
+.opts{display:grid;gap:10px}
+.opts.pics{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opt{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:14px 16px;text-align:left;font-size:17px;font-weight:700;transition:border-color .12s,transform .12s}
+.opt:hover:not(:disabled){border-color:var(--w)}
+.opt:active:not(:disabled){transform:scale(.98)}
+.opt.pic{text-align:center;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.opt.pic .em{font-size:clamp(46px,13vw,64px);line-height:1.1}
+.opt.pic .lb{font-size:14px;min-height:21px;color:var(--muted)}
+.opt.ok{border-color:var(--good);background:var(--good-bg)}
+.opt.no{border-color:var(--bad);background:var(--bad-bg);opacity:.75}
+.opt:disabled{cursor:default}
+.slot{min-height:64px;border:2px dashed var(--line);border-radius:12px;padding:10px;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.slot.col{flex-direction:column;flex-wrap:nowrap}
+.slot.ok{border-color:var(--good);border-style:solid;background:var(--good-bg)}
+.slot.no{border-color:var(--bad);border-style:solid}
+.bank{display:flex;flex-wrap:wrap;gap:8px}
+.bank.col{flex-direction:column}
+.tile{background:var(--surface);border:2px solid var(--line);border-bottom-width:4px;border-radius:10px;padding:8px 14px;font-weight:700;font-size:17px;text-align:left}
+.tile.step{font-weight:400;font-size:16px;width:100%}
+.tile.step b{color:var(--w);margin-right:6px}
+.tile:hover:not(:disabled){border-color:var(--w)}
+.tile.used{display:none}
+.tile.ok{border-color:var(--good);background:var(--good-bg)}
+.tile.no{border-color:var(--bad);background:var(--bad-bg)}
+.words{display:flex;flex-wrap:wrap;gap:8px}
+.words .tile{font-size:19px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{border:none;border-radius:10px;padding:12px 20px;font-weight:700;font-size:16px;background:var(--w);color:#fff}
+.btn.ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.inp{flex:1;min-width:0;border:2px solid var(--line);border-radius:10px;padding:12px 14px;font-size:18px;font-weight:700;background:var(--surface)}
+.inp.ok{border-color:var(--good);background:var(--good-bg)}
+.inp.no{border-color:var(--bad)}
+.fb{border-radius:10px;padding:12px 14px;font-size:15px;display:flex;flex-direction:column;gap:4px}
+.fb.ok{background:var(--good-bg);border:1px solid var(--good)}
+.fb.no{background:var(--bad-bg);border:1px solid var(--bad)}
+.fb strong{font-size:16px}
+.fb.ok strong{color:var(--good)} .fb.no strong{color:var(--bad)}
+.blank{display:inline-block;min-width:70px;border-bottom:3px solid var(--w);text-align:center;color:var(--w)}
+
+.result{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center}
+.result h1{font-size:clamp(44px,11vw,64px);text-transform:uppercase;color:var(--w)}
+.result.fail h1{color:var(--bad)}
+.stars{font-size:48px;letter-spacing:6px;color:var(--gold)}
+.stars .off{color:var(--line)}
+.badge{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--gold);border-radius:999px;padding:8px 16px;font-weight:700}
+
+.rules ol{margin:0;padding-left:20px;color:var(--muted);font-size:15px;display:flex;flex-direction:column;gap:6px}
+.rules b,.guide b{color:var(--ink)}
+.report-btn{display:flex;gap:14px;align-items:center;text-align:left;background:var(--surface);border:2px solid var(--ink);border-radius:14px;padding:14px 18px}
+.report-btn > span:first-child{font-size:32px}
+.report-btn b{display:block;font-family:var(--f-display);font-size:24px;text-transform:uppercase;line-height:1.1}
+.report-btn small{color:var(--muted);font-size:14px}
+.tools{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:520px){.tools{grid-template-columns:1fr}}
+.tool{display:flex;gap:12px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.tool:hover:not(:disabled){border-color:var(--w)}
+.tool:disabled{opacity:.55;cursor:not-allowed}
+.tool .ti{font-size:26px;flex:none}
+.tool > span:last-child{min-width:0}
+.tool b{display:block;font-size:16px}
+.tool small{color:var(--muted);font-size:13px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.ph{font-size:clamp(40px,10vw,60px);font-weight:900;text-transform:uppercase;color:var(--w)}
+.h3{font-family:var(--f-display);font-size:24px;text-transform:uppercase}
+.muted{color:var(--muted);margin:0;font-size:15px}
+.gl{display:flex;flex-direction:column}
+.gl-r{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.gl-r b{font-size:17px}
+.gl-r span{color:var(--muted);font-size:15px}
+.speak.sm{width:36px;height:36px;font-size:16px}
+.rp{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.rp-h{background:var(--w);color:#fff;padding:16px 18px;display:flex;flex-direction:column;gap:4px}
+.rp-h .mono{color:rgba(255,255,255,.88)}
+.rp-h h2{font-size:30px;text-transform:uppercase}
+.rp-h p{margin:0}
+.rp-roles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1px;background:var(--line)}
+@media (max-width:520px){.rp-roles{grid-template-columns:1fr}}
+.rp-roles > div{background:var(--surface);padding:14px 18px;min-width:0}
+.rp-roles p{margin:4px 0 0;font-size:15px}
+.rp-ph{padding:14px 18px;border-top:1px solid var(--line)}
+.tblw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--surface2);font-weight:700}
+.lbl{font-weight:700;font-size:14px}
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kpis div{background:var(--surface2);border-radius:10px;padding:12px;display:flex;flex-direction:column;min-width:0}
+.kpis b{font-family:var(--f-display);font-size:26px;line-height:1.1;color:var(--w)}
+.kpis span{font-size:13px;color:var(--muted)}
+.elrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(80px,140px) 48px;gap:10px;align-items:center;font-size:14px;text-align:left}
+.elrow small{grid-column:1/-1;color:var(--muted);margin-top:-6px}
+.elbar{height:8px;background:var(--line);border-radius:4px;overflow:hidden}
+.elbar i{display:block;height:100%;background:var(--w)}
+.elrow b{text-align:right}
+.elbox{width:100%;max-width:440px;display:flex;flex-direction:column;gap:8px;border-top:1px dashed var(--line);padding-top:12px}
+.tipbox{background:var(--surface2);border-radius:10px;padding:10px 14px;margin:0;font-size:15px}
+.guide{margin:0;padding-left:20px;color:var(--muted);font-size:15px;display:flex;flex-direction:column;gap:6px}
+.doc{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.doc-h{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--line)}
+.doc-h .mono{color:var(--w)}
+.doc-b{padding:12px 14px;font-size:16px;line-height:1.55}
+.doc-b p{margin:0}
+.doc-b .sp{height:10px}
+.doc-b .tblw{margin:6px 0}
+.rq{display:flex;flex-direction:column;gap:10px;border-top:1px dashed var(--line);padding-top:14px}
+.qtext{margin:0;font-size:19px;font-weight:700}
+.frame{background:var(--surface2);border-radius:10px;padding:12px 14px}
+.pre{white-space:pre-wrap;font-family:var(--f-body);font-size:15px;margin:6px 0 0;line-height:1.5}
+.model{border:1px dashed var(--line);border-radius:10px;padding:10px 14px}
+.model summary{cursor:pointer;font-weight:700;color:var(--muted)}
+.ta{width:100%;border:2px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;font-size:16px;background:var(--surface);color:var(--ink);resize:vertical}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--muted)}
+.checks li.on{color:var(--good);font-weight:700}
+.opt.sel,.tile.sel{border-color:var(--ink);background:var(--surface2)}
+.mt{font-size:30px;text-transform:uppercase}
+.tk-el{padding-block:6px;border-bottom:1px solid var(--line)}
+.tk-el .mono{color:var(--w)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes pop{0%{transform:scale(.7);opacity:.3}100%{transform:scale(1);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.pop{animation:pop .35s ease-out}
+.shake{animation:shake .3s}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------- LEVELS ---------- */
+const LEVELS=[
+ {name:"Rookie",grade:"Fase D awal · A1",desc:"Salam, angka, jam, hari, simple present, kata depan",help:"full",lives:0,sup:"Audio & terjemahan penuh"},
+ {name:"Starter",grade:"Fase D · A2",desc:"Past tense, can, perasaan, pendapat",help:"full",lives:0,sup:"Audio & terjemahan penuh"},
+ {name:"Explorer",grade:"Fase D · A2",desc:"Kosakata kerja & instruksi pendek",help:"full",lives:0,sup:"Gambar, audio, terjemahan"},
+ {name:"Apprentice",grade:"Fase D akhir · A2+",desc:"Prosedur kerja & SOP",help:"full",lives:5,sup:"Terjemahan & petunjuk"},
+ {name:"Technician",grade:"Fase E · B1",desc:"Deskripsi, recount, pelanggan",help:"tap",lives:4,sup:"Terjemahan bila diminta"},
+ {name:"Professional",grade:"Fase E–F · B1+",desc:"Laporan, rekomendasi, indirect speech",help:"none",lives:3,sup:"Tanpa terjemahan"}
+];
+const ELEM={pick:"Menyimak–Berbicara",lis:"Menyimak–Berbicara",dict:"Menyimak–Berbicara",dlg:"Menyimak–Berbicara",mean:"Membaca–Memirsa",cloze:"Membaca–Memirsa",arr:"Menulis–Mempresentasikan",ord:"Menulis–Mempresentasikan",type:"Menulis–Mempresentasikan",err:"Menulis–Mempresentasikan"};
+const ELEMS=["Menyimak–Berbicara","Membaca–Memirsa","Menulis–Mempresentasikan"];
+const BOSS={name:"Boss Mission",help:"none",lives:3,time:45,count:10};
+
+/* ---------- item builders (first option is always the correct one; options are shuffled on screen) ---------- */
+const P=(say,tr,o,hint)=>({t:"pick",say,tr,o,hint});
+const L=(say,o,hint)=>({t:"lis",say,o,hint});
+const M=(say,o,hint)=>({t:"mean",say,o,hint});
+const D=(who,say,tr,o,hint)=>({t:"dlg",who,say,tr,o,hint});
+const C=(ctx,s,o,hint,tr)=>({t:"cloze",ctx,s,o,hint,tr});
+const A=(tr,w,hint)=>({t:"arr",tr,w,hint});
+const O=(ctx,steps,hint)=>({t:"ord",ctx,steps,hint});
+const T=(ctx,s,ans,hint,tr)=>({t:"type",ctx,s,ans,hint,tr});
+const E=(s,bad,fix,hint)=>({t:"err",s,bad,fix,hint});
+const X=(ctx,say,ans,hint)=>({t:"dict",ctx,say,ans,hint});
+const ORD="Gunakan kata urutan: First → Then → Next/After that → Finally.";
+const PAST="Ada keterangan waktu lampau (yesterday, last week, ago), jadi kata kerjanya harus bentuk lampau (V2).";
+const REP="Dalam kalimat tidak langsung (said that…), kata kerja mundur satu waktu: is→was, will→would, like→liked.";
+const SP="He/she/it/nama orang + kata kerja ditambah -s/-es (count → counts).";
+const PT="Kemarin/minggu lalu → kata kerja bentuk lampau (V2).";
+const DN="Kalimat negatif lampau: didn't + kata kerja bentuk dasar.";
+const DQ="Pertanyaan Did …? dijawab Yes, I did / No, I didn't.";
+const HB="Had better + kata kerja bentuk dasar (V1) = sebaiknya.";
+
+/* ---------- CONTENT ---------- */
+const W=[
+{key:"acc",title:"Ledger Legends",dept:"Akuntansi & Keuangan Lembaga",ico:"🧮",place:"Bagian keuangan kantor",
+ intro:"Kamu staf keuangan baru. Kenali dokumen transaksi, ikuti SOP pencatatan, layani klien, lalu susun laporan dan rekomendasi keuangan.",
+ missions:[
+ {title:"Hari Pertama",en:"First Day at Work",brief:"Hari pertamamu di bagian keuangan. Kenalkan diri, dengarkan angka dan jadwal.",items:[
+  D("Manager","Good morning! What's your name?","Selamat pagi! Siapa namamu?",["Good morning. My name is Dimas.","I am fine, thank you.","It's Monday."],"Pertanyaan 'What's your name?' dijawab dengan nama."),
+  X("Dengarkan jumlah uang, lalu tulis dalam angka.","twenty-five thousand rupiah",["25000","25000 rupiah","rp25000","twenty-five thousand","twenty-five thousand rupiah"],"Twenty-five = 25. Thousand = ribu."),
+  L("The office opens at half past seven.",["Kantor buka pukul 07.30.","Kantor buka pukul 07.15.","Kantor buka pukul 06.30."],"Half past seven = setengah jam lewat pukul 7 (07.30)."),
+  C("Office schedule","We pay the salaries on the ___ day of every month.",["first","one","once"],"Untuk urutan tanggal pakai bilangan bertingkat: first, second, third.","Kami membayar gaji pada hari pertama setiap bulan."),
+  C("Daily routine","The cashier ___ the money every afternoon.",["counts","count","counting"],SP,"Kasir menghitung uang setiap sore."),
+  M("There are three files on the desk.",["Ada tiga map di atas meja.","Ada tiga map di bawah meja.","Ada tiga meja di kantor."],"On = di atas. Under = di bawah."),
+  X("Tulis nama hari yang kamu dengar.","Thursday",["thursday"],"Hari Kamis. Ejaan: T-H-U-R-S-D-A-Y."),
+  C("Where is it?","The calculator is ___ the drawer.",["in","on","at"],"In = di dalam.","Kalkulatornya ada di dalam laci.")]},
+ {title:"Minggu Pertama",en:"My First Week",brief:"Ceritakan apa yang kamu kerjakan minggu ini dan minta bantuan dengan sopan.",items:[
+  C("Yesterday at the office","Yesterday I ___ ten receipts.",["checked","check","checks"],PT,"Kemarin saya memeriksa sepuluh kuitansi."),
+  C("Last month","The client ___ pay the bill last month.",["didn't","doesn't","isn't"],DN,"Klien tidak membayar tagihan bulan lalu."),
+  D("Supervisor","Did you finish the cash report?","Apakah kamu sudah menyelesaikan laporan kas?",["Yes, I did. It's on your desk.","Yes, I do.","No, I am not."],DQ),
+  D("Colleague","Can you help me with this invoice, please?","Bisakah kamu membantu saya dengan faktur ini?",["Sure, I can help you.","No, I can't swim.","Yes, it is."],"Can you …? = Bisakah kamu …? Jawab: Sure, I can."),
+  M("I think the numbers are wrong.",["Menurut saya angkanya salah.","Saya sedang menghitung angkanya.","Angkanya sudah benar."],"I think = menurut saya."),
+  C("Feelings","I feel ___ because I made a mistake in the report.",["worried","delicious","tall"],"Worried = khawatir.","Saya merasa khawatir karena membuat kesalahan di laporan."),
+  T("Last Monday","Last Monday, we ___ (count) the cash together.",["counted"],PT,"Senin lalu kami menghitung uang kas bersama."),
+  C("Work habit","Please write the numbers ___.",["carefully","careful","care"],"Adverb (kata keterangan cara) biasanya berakhiran -ly.","Tolong tulis angkanya dengan hati-hati.")]},
+ {title:"Meja Keuangan",en:"The Finance Desk",brief:"Supervisor keuangan meminta barang dan memberi instruksi singkat.",items:[
+  P("Find the calculator.","Temukan kalkulatornya.",[["🧮","calculator"],["🧾","receipt"],["📒","ledger"]],"A calculator helps you count numbers quickly."),
+  P("Give me the receipt.","Berikan kuitansinya.",[["🧾","receipt"],["💵","cash"],["📁","folder"]],"A receipt is proof that someone paid. (Kuitansi/struk.)"),
+  P("Put the cash in the drawer.","Masukkan uang tunai ke laci.",[["💵","cash"],["💳","card"],["🧮","calculator"]],"Cash = uang tunai (paper money and coins)."),
+  P("Open the ledger.","Buka buku besarnya.",[["📒","ledger"],["🗂️","file box"],["📅","calendar"]],"A ledger is a book of accounts. (Buku besar.)"),
+  P("The customer wants to pay by card.","Pelanggan ingin membayar dengan kartu.",[["💳","card"],["💵","cash"],["🧾","receipt"]],"Pay by card = bayar dengan kartu debit/kredit."),
+  L("Please check the invoice.",["Tolong periksa fakturnya.","Tolong bayar tagihannya.","Tolong cetak kuitansinya."],"Invoice = faktur. Check = periksa."),
+  L("The total is two hundred thousand rupiah.",["Totalnya dua ratus ribu rupiah.","Totalnya dua juta rupiah.","Totalnya dua puluh ribu rupiah."],"Hundred thousand = ratus ribu. Million = juta."),
+  M("The payment is due on Friday.",["Pembayaran jatuh tempo hari Jumat.","Pembayaran sudah lunas hari Jumat.","Kantor tutup hari Jumat."],"Due = jatuh tempo (batas waktu bayar).")]},
+ {title:"SOP Pencatatan",en:"Recording Procedures",brief:"Ikuti prosedur pencatatan kas dan pembuatan faktur dengan urutan yang benar.",items:[
+  O("SOP: Recording a cash payment",["First, receive the receipt from the staff.","Then, check the amount on the receipt.","After that, record the payment in the cash book.","Finally, file the receipt in the folder."],ORD),
+  A("Catat setiap transaksi di jurnal.","Record every transaction in the journal.","Kalimat perintah dimulai dengan kata kerja: Record …"),
+  C("Accounting rule",'Total debit must be ___ to total credit.',["equal","bigger","faster"],"Dalam akuntansi, total debit = total kredit (equal).","Total debit harus sama dengan total kredit."),
+  M("Do not throw away the receipts.",["Jangan membuang kuitansinya.","Jangan menghitung kuitansinya.","Jangan mencetak kuitansinya."],"Throw away = membuang."),
+  C("SOP step 2","___, add up all the expenses.",["Then","Yesterday","Because"],"Langkah kedua memakai kata urutan.","Lalu, jumlahkan semua pengeluaran."),
+  A("Simpan faktur di dalam map.","Keep the invoices in the folder.","Keep = simpan. Mulai dengan kata kerja."),
+  O("SOP: Making a sales invoice",["First, write the customer's name.","Then, list the items and prices.","Next, calculate the total amount.","Finally, sign the invoice and send it."],ORD),
+  C("Supervisor's advice","You had better ___ the numbers twice.",["check","checked","checking"],HB,"Sebaiknya kamu memeriksa angkanya dua kali.")]},
+ {title:"Klien & Transaksi",en:"Clients & Transactions",brief:"Klien menelepon, manajer bertanya, dan kamu menceritakan transaksi kemarin.",items:[
+  D("Client","I paid the invoice yesterday, but I didn't get a receipt.","Saya sudah bayar fakturnya kemarin, tapi tidak dapat kuitansi.",["I'm sorry. Let me check the payment and send you the receipt today.","Receipts are not important.","Please pay again tomorrow."],"Minta maaf, periksa, lalu beri solusi."),
+  D("Client","Why is my bill higher this month?","Kenapa tagihan saya lebih tinggi bulan ini?",["Let me check. This month includes a late payment fee.","Because you are rich.","I don't know. Ask someone else."],"Jelaskan alasannya dengan sopan."),
+  T("Recount: what happened yesterday","Yesterday, the cashier ___ (receive) Rp500.000 from a customer.",["received"],PAST,"Kemarin kasir menerima Rp500.000 dari pelanggan."),
+  E("Last week the company buy three new computers.","buy","bought",PAST),
+  L("The balance in the bank account is lower than last month.",["Saldo rekening bank lebih rendah dari bulan lalu.","Saldo rekening bank lebih tinggi dari bulan lalu.","Rekening bank ditutup bulan lalu."],"Lower = lebih rendah. Balance = saldo."),
+  T("Describing a report","This report is ___ (clear) than the old one.",["clearer"],"Perbandingan kata sifat pendek: tambah -er (clear → clearer).","Laporan ini lebih jelas daripada yang lama."),
+  D("Manager","Did you find the mistake in the cash book?","Apakah kamu menemukan kesalahan di buku kas?",["Yes. Someone wrote 50,000 instead of 500,000.","Yes, the book is blue.","No, I was sleeping."],"Jawab dengan menyebut kesalahan yang ditemukan."),
+  E("While I was checking the invoices, the manager call me.","call","called","Past progressive (was checking) + past simple (called) untuk kejadian yang menyela.")]},
+ {title:"Laporan Keuangan",en:"Financial Report",brief:"Tulis laporan bulanan Café Senja dan beri rekomendasi kepada pemilik.",items:[
+  C("MONTHLY REPORT: Café Senja, October","Total income was Rp12.000.000, ___ total expenses were Rp9.500.000.",["while","because","if"],"While = sedangkan, untuk membandingkan dua hal."),
+  T("MONTHLY REPORT","So, the café made a ___ of Rp2.500.000.",["profit"],"Pendapatan lebih besar dari pengeluaran = laba (p…)."),
+  C("Recommendation","I recommend ___ the electricity cost because it increased by 20%.",["reducing","reduce","reduced"],"Recommend + verb-ing."),
+  E("The manager said that the report is late yesterday.","is","was",REP),
+  C("Indirect speech","Direct: 'I will pay next week.' → The client said that she ___ pay the next week.",["would","will","was"],REP),
+  A("Saya menyarankan agar kita menyimpan semua kuitansi secara digital.","I suggest that we keep all receipts digitally.","Pola: I suggest that + subjek + kata kerja."),
+  D("Owner","Should we buy a new oven this month?","Haruskah kita membeli oven baru bulan ini?",["I don't think so. Our cash is limited, so it is better to wait until next month.","Yes, buy everything!","Ovens are hot."],"Rekomendasi profesional selalu disertai alasan."),
+  T("Report conclusion","The expenses went up ___ the price of coffee beans increased.",["because","as","since"],"Kata hubung untuk alasan (b…).")]}
+ ]},
+{key:"tou",title:"Island Guide",dept:"Usaha Layanan Pariwisata",ico:"🏝️",place:"Pelabuhan, hotel & destinasi",
+ intro:"Kamu pemandu wisata pulau. Siapkan perlengkapan, ikuti SOP penyambutan, ceritakan destinasi dan legenda, lalu susun paket wisata.",
+ missions:[
+ {title:"Halo, Tamu!",en:"Hello, Guests!",brief:"Kenalkan dirimu kepada tamu, dengarkan jumlah orang, jam, dan arah.",items:[
+  D("Guest","Hello! Nice to meet you.","Halo! Senang bertemu denganmu.",["Nice to meet you too. I'm your guide today.","I'm twenty years old.","Yes, it is."],"Balas 'Nice to meet you' dengan 'Nice to meet you too'."),
+  X("Berapa orang dalam rombongan? Tulis angkanya.","fifteen",["15","fifteen"],"Fifteen = 15. Hati-hati, fifty = 50."),
+  L("The boat leaves at a quarter to nine.",["Perahu berangkat pukul 08.45.","Perahu berangkat pukul 09.15.","Perahu berangkat pukul 09.45."],"A quarter to nine = seperempat jam (15 menit) sebelum pukul 9."),
+  C("At the hotel","Your room is on the ___ floor.",["third","three","tree"],"Lantai memakai bilangan bertingkat: first, second, third.","Kamarmu ada di lantai tiga."),
+  C("About the guide","Our guide ___ English and Indonesian.",["speaks","speak","speaking"],SP,"Pemandu kami berbicara bahasa Inggris dan Indonesia."),
+  M("The souvenir shop is next to the hotel.",["Toko oleh-oleh ada di sebelah hotel.","Toko oleh-oleh ada di belakang hotel.","Toko oleh-oleh ada di dalam hotel."],"Next to = di sebelah."),
+  X("Tulis nama bulan yang kamu dengar.","August",["august"],"Agustus. Ejaan: A-U-G-U-S-T."),
+  C("Giving directions","Turn ___ at the mosque, then go straight.",["left","leaf","lift"],"Left = kiri, right = kanan.","Belok kiri di masjid, lalu jalan lurus.")]},
+ {title:"Cerita Liburan",en:"Holiday Stories",brief:"Ceritakan kegiatan wisata yang sudah terjadi dan jawab permintaan tamu.",items:[
+  C("Last holiday","Last holiday, many tourists ___ the beach.",["visited","visit","visits"],PT,"Liburan lalu banyak turis mengunjungi pantai."),
+  C("Yesterday","We ___ go snorkeling yesterday because it rained.",["didn't","don't","weren't"],DN,"Kami tidak snorkeling kemarin karena hujan."),
+  D("Tourist","Did you see my sunglasses?","Apakah kamu melihat kacamata hitam saya?",["Yes, I did. They are on the bus.","Yes, I do.","No, it isn't."],DQ),
+  D("Tourist","Can I take a photo here?","Boleh saya berfoto di sini?",["Yes, you can. The view is beautiful.","No, I can't cook.","Yes, I am."],"Can I …? = Bolehkah saya …? Jawab: Yes, you can."),
+  M("I think this island is the best place for diving.",["Menurut saya pulau ini tempat terbaik untuk menyelam.","Saya pernah menyelam di pulau ini.","Pulau ini tidak cocok untuk menyelam."],"I think = menurut saya. The best = terbaik."),
+  C("Feelings","The tourists were ___ after the long trip.",["tired","tidy","tasty"],"Tired = lelah.","Para turis lelah setelah perjalanan panjang."),
+  T("Telling what happened","When we ___ (arrive) at the harbor, the boat was ready.",["arrived"],"When + kejadian lampau: arrive → arrived.","Ketika kami tiba di pelabuhan, perahunya sudah siap."),
+  C("Safety","Please walk ___ on the wet stones.",["slowly","slow","slower"],"Adverb (kata keterangan cara) biasanya berakhiran -ly.","Tolong berjalan pelan-pelan di batu yang basah.")]},
+ {title:"Perlengkapan Tur",en:"Tour Kit",brief:"Ketua tim tur meminta perlengkapan dan memberi pengumuman singkat.",items:[
+  P("Find the map.","Temukan petanya.",[["🗺️","map"],["🎒","backpack"],["📷","camera"]],"A map shows places and roads."),
+  P("Where are the tickets?","Di mana tiketnya?",[["🎫","ticket"],["🧳","suitcase"],["🗺️","map"]],"Tourists need a ticket to enter or board."),
+  P("Carry the suitcase, please.","Tolong bawakan kopernya.",[["🧳","suitcase"],["🎫","ticket"],["📷","camera"]],"A suitcase holds clothes for a trip. (Koper.)"),
+  P("Let's go to the beach.","Ayo ke pantai.",[["🏖️","beach"],["⛰️","mountain"],["🏙️","city"]],"A beach has sand and sea."),
+  P("Please book a hotel room.","Tolong pesan kamar hotel.",[["🏨","hotel"],["✈️","plane"],["🚢","ship"]],"A hotel is a place to sleep when you travel."),
+  L("The boat leaves at noon.",["Perahu berangkat pukul dua belas siang.","Perahu tiba tengah malam.","Perahunya sedang rusak."],"Noon = pukul 12 siang. Leave = berangkat."),
+  L("Welcome to our island.",["Selamat datang di pulau kami.","Selamat jalan dari pulau kami.","Pulau kami sangat kecil."],"Welcome = selamat datang."),
+  M("Don't forget your passport.",["Jangan lupa paspormu.","Jangan bawa paspormu.","Paspormu hilang."],"Forget = lupa.")]},
+ {title:"SOP Pemandu",en:"Guide Procedures",brief:"Ikuti prosedur menyambut rombongan dan check-in tamu hotel.",items:[
+  O("SOP: Welcoming a tour group",["First, greet the guests at the harbor.","Then, introduce yourself and the driver.","After that, count the number of guests.","Finally, explain the plan for the day."],ORD),
+  A("Tur dimulai pukul sembilan.","The tour starts at nine o'clock.","Untuk jam gunakan 'at': at nine o'clock."),
+  C("It is very sunny today.","Please bring your hat and ___.",["sunscreen","invoice","stapler"],"Sunscreen = tabir surya.","Tolong bawa topi dan tabir surya."),
+  C("Safety briefing","___ wear a life jacket on the boat.",["Always","Never","Yesterday"],"Aturan keselamatan: selalu pakai jaket pelampung.","Selalu pakai jaket pelampung di perahu."),
+  O("SOP: Checking in a hotel guest",["First, ask for the guest's name and booking number.","Then, check the reservation in the system.","Next, ask for an ID card.","Finally, give the key card and explain the breakfast time."],ORD),
+  M("Please stay together with the group.",["Mohon tetap bersama rombongan.","Mohon berpencar dari rombongan.","Mohon tunggu di hotel."],"Stay together = tetap bersama."),
+  A("Mohon tiba di pelabuhan lebih awal.","Please arrive at the harbor early.","Mulai dengan kata sopan: Please …"),
+  C("Guide's advice","You had better ___ a raincoat in December.",["bring","brought","bringing"],HB,"Sebaiknya kamu membawa jas hujan di bulan Desember.")]},
+ {title:"Bercerita kepada Turis",en:"Describe & Tell",brief:"Jawab pertanyaan turis, deskripsikan destinasi, dan ceritakan legenda lokal.",items:[
+  D("Tourist","How much is the island tour?","Berapa harga tur pulaunya?",["It is 250,000 rupiah per person, including lunch.","It is very sunny.","The boat is white."],"'How much' menanyakan harga."),
+  D("Tourist","Oh no, I lost my bag!","Aduh, tas saya hilang!",["Don't worry. Where did you last see it?","That's funny.","Buy a new bag."],"Tenangkan tamu, lalu tanyakan informasi untuk membantu."),
+  T("Describing a destination","This is the ___ (beautiful) beach on the island.",["most beautiful"],"Superlatif kata sifat panjang: the most + adjective.","Ini pantai paling indah di pulau ini."),
+  T("Telling a legend","Long ago, a young fisherman ___ (live) near this bay.",["lived"],"Legenda diceritakan dengan past tense: live → lived.","Dahulu kala, seorang nelayan muda tinggal di dekat teluk ini."),
+  E("Once upon a time, a king build a palace on this hill.","build","built","Cerita masa lalu memakai V2: build → built."),
+  L("The waterfall is about thirty minutes from the village.",["Air terjun sekitar tiga puluh menit dari desa.","Air terjun sekitar tiga belas menit dari desa.","Desa itu ada di atas air terjun."],"Thirty (30) bunyinya mirip thirteen (13). Dengarkan tekanan suaranya."),
+  D("Tourist","Can you tell us about this old fort?","Bisakah kamu ceritakan tentang benteng tua ini?",["Sure. Traders built it long ago to protect the spice trade.","It's old.","I don't like history."],"Pemandu menjawab dengan informasi, bukan sekadar 'ya'."),
+  E("While we were swimming, it start to rain.","start","started","Past progressive (were swimming) + past simple (started).")]},
+ {title:"Paket Wisata",en:"Tour Packages",brief:"Susun itinerary, rekomendasikan paket, dan tangani keluhan tamu.",items:[
+  C("ITINERARY: Day 1, 12:00","Lunch is ___ at a local restaurant.",["included","broken","unplugged"],"Included = sudah termasuk dalam harga."),
+  D("Tourist","The boat was late and we waited for one hour.","Perahunya terlambat dan kami menunggu satu jam.",["I'm very sorry for the delay. Please enjoy a free drink while we prepare the boat.","It is not my problem.","Boats are always late."],"Minta maaf, lalu tawarkan solusi."),
+  C("Recommending a package","I recommend the three-day package ___ it includes snorkeling and a village visit.",["because","although","but"],"Rekomendasi diikuti alasan: because."),
+  T("Indirect speech","Direct: 'The room is too noisy.' → The guest complained that the room ___ too noisy.",["was"],REP),
+  E("The guests said that they are very happy with the tour yesterday.","are","were",REP),
+  A("Meskipun cuacanya buruk, para tamu menikmati tur.","Although the weather was bad, the guests enjoyed the tour.","Although = meskipun, diletakkan di awal kalimat."),
+  C("Promotion text","The island, ___ is famous for its coral reefs, is perfect for diving.",["which","who","where"],"Adjective clause untuk benda/tempat sebagai subjek: which."),
+  T("Report to manager","Most guests ___ (enjoy) the sunset trip last night.",["enjoyed"],PAST)]}
+ ]},
+{key:"mkt",title:"Brand Rush",dept:"Pemasaran / Bisnis Digital",ico:"📢",place:"Toko & media sosial",
+ intro:"Kamu staf pemasaran produk lokal. Kenali alat promosi, ikuti langkah promosi online, layani pembeli, lalu susun rencana pemasaran.",
+ missions:[
+ {title:"Selamat Datang di Toko",en:"Welcome to the Shop",brief:"Sapa pembeli, dengarkan harga dan jam buka, kenali warna produk.",items:[
+  D("Customer","Hi! How are you?","Hai! Apa kabar?",["I'm fine, thank you. How can I help you?","I'm a shop.","It's ten o'clock."],"Jawab kabar, lalu tawarkan bantuan."),
+  X("Dengarkan harganya, lalu tulis dalam angka.","thirty-five thousand rupiah",["35000","35000 rupiah","rp35000","thirty-five thousand","thirty-five thousand rupiah"],"Thirty-five = 35. Thousand = ribu."),
+  L("The shop closes at nine p.m.",["Toko tutup pukul sembilan malam.","Toko buka pukul sembilan pagi.","Toko tutup pukul lima sore."],"Close = tutup. p.m. = siang/sore/malam."),
+  C("Product colors","This T-shirt comes in red, blue, and ___.",["white","window","wide"],"White = putih.","Kaos ini ada warna merah, biru, dan putih."),
+  C("About our shop","Our shop ___ local snacks.",["sells","sell","selling"],SP,"Toko kami menjual camilan lokal."),
+  M("The new products are behind the counter.",["Produk baru ada di belakang meja kasir.","Produk baru ada di depan toko.","Produk baru sudah habis."],"Behind = di belakang."),
+  X("Tulis nama hari diskon yang kamu dengar.","Saturday",["saturday"],"Hari Sabtu. Ejaan: S-A-T-U-R-D-A-Y."),
+  C("Big sale","The sale starts on the ___ of May.",["fifth","five","fifty"],"Tanggal memakai bilangan bertingkat: fifth = ke-5.","Diskon dimulai tanggal 5 Mei.")]},
+ {title:"Kemarin di Toko",en:"Yesterday at the Shop",brief:"Ceritakan penjualan kemarin dan layani permintaan pembeli.",items:[
+  C("Yesterday","Yesterday we ___ 50 boxes of cookies.",["sold","sell","sells"],"Sell adalah kata kerja tidak beraturan: sell → sold.","Kemarin kami menjual 50 kotak kue."),
+  C("A customer's choice","The customer ___ like the color, so she chose another one.",["didn't","doesn't","wasn't"],DN,"Pembeli tidak suka warnanya, jadi dia memilih yang lain."),
+  D("Owner","Did you post the promo on Instagram?","Apakah kamu sudah mengunggah promo di Instagram?",["Yes, I did. It already has 200 likes.","Yes, I do.","No, I am not."],DQ),
+  D("Customer","Can you wrap this as a gift?","Bisakah kamu membungkus ini sebagai kado?",["Of course, I can.","No, I can't drive.","Yes, it's red."],"Can you …? dijawab: Of course, I can."),
+  M("I think teenagers will love this product.",["Menurut saya remaja akan menyukai produk ini.","Remaja tidak suka produk ini.","Saya remaja yang suka produk ini."],"I think = menurut saya. Will = akan."),
+  C("Feelings","The customers were ___ with the free gift.",["happy","hungry","heavy"],"Happy = senang.","Para pembeli senang dengan hadiah gratisnya."),
+  T("Last week","Last week, we ___ (open) a new booth at the market.",["opened"],PT,"Minggu lalu kami membuka stan baru di pasar."),
+  C("Selling tip","Explain the product ___ so customers understand.",["clearly","clear","clearer"],"Adverb (kata keterangan cara) biasanya berakhiran -ly.","Jelaskan produknya dengan jelas supaya pembeli paham.")]},
+ {title:"Toko Kita",en:"Our Shop",brief:"Pemilik toko memberi instruksi singkat di hari pertamamu.",items:[
+  P("Find the price tag.","Temukan label harganya.",[["🏷️","price tag"],["🛒","cart"],["📢","megaphone"]],"A price tag shows how much a product costs."),
+  P("Show me the shopping cart.","Tunjukkan troli belanjanya.",[["🛒","cart"],["🏷️","price tag"],["📦","box"]],"Customers put products in a shopping cart."),
+  P("Use the megaphone to call customers.","Gunakan pengeras suara untuk memanggil pelanggan.",[["📢","megaphone"],["📱","phone"],["📊","chart"]],"A megaphone makes your voice louder."),
+  P("Look at the sales chart.","Lihat grafik penjualannya.",[["📊","chart"],["📢","megaphone"],["🧾","receipt"]],"A chart shows numbers as a picture."),
+  P("Pack the product in a box.","Kemas produknya dalam kotak.",[["📦","box"],["🛒","cart"],["🏷️","price tag"]],"Pack = kemas. Box = kotak."),
+  L("This product is on sale.",["Produk ini sedang diskon.","Produk ini sudah habis.","Produk ini rusak."],"On sale = sedang diskon."),
+  L("Buy one, get one free.",["Beli satu, gratis satu.","Beli satu, bayar dua.","Satu untuk semua."],"Get … free = dapat gratis."),
+  M("Our customers are mostly teenagers.",["Pelanggan kami kebanyakan remaja.","Pelanggan kami sedikit sekali.","Kami tidak punya pelanggan remaja."],"Mostly = kebanyakan.")]},
+ {title:"Langkah Promosi",en:"Promotion Steps",brief:"Ikuti langkah promosi produk di media sosial dan proses pesanan online.",items:[
+  O("SOP: Posting a product on social media",["First, take a clear photo of the product.","Then, write a short and catchy caption.","After that, add the price and hashtags.","Finally, post it and reply to comments."],ORD),
+  A("Tulis keterangan yang singkat dan menarik.","Write a short and catchy caption.","Catchy = menarik perhatian."),
+  C("Selling tip","Always ___ at the customer and say hello.",["smile","sleep","shout"],"Penjual yang baik selalu tersenyum.","Selalu tersenyum kepada pelanggan dan sapa mereka."),
+  M("Free delivery for orders above 100,000 rupiah.",["Gratis ongkir untuk pesanan di atas 100.000 rupiah.","Ongkir 100.000 rupiah untuk semua pesanan.","Pesanan di bawah 100.000 rupiah gratis."],"Above = di atas. Free delivery = gratis ongkir."),
+  O("SOP: Handling an online order",["First, confirm the order with the customer.","Then, check the stock in the warehouse.","Next, pack the product carefully.","Finally, send the tracking number to the customer."],ORD),
+  C("Marketing plan","___, we choose our target market. Then, we make the content.",["First","Finally","Yesterday"],"Langkah pertama: First.","Pertama, kita menentukan target pasar."),
+  A("Periksa stok sebelum kamu menerima pesanan.","Check the stock before you accept an order.","Before = sebelum."),
+  C("Supervisor's advice","You had better ___ to every message quickly.",["reply","replied","replying"],HB,"Sebaiknya kamu membalas setiap pesan dengan cepat.")]},
+ {title:"Melayani Pembeli",en:"Serving Buyers",brief:"Jawab pertanyaan pembeli, deskripsikan produk, dan ceritakan hasil penjualan.",items:[
+  D("Customer","Is this bag available in black?","Apakah tas ini ada yang warna hitam?",["Yes, it is. We have it in black and brown.","Bags are useful.","No. Go away."],"Jawab pertanyaan, lalu beri pilihan."),
+  D("Customer","It's too expensive for me.","Ini terlalu mahal untuk saya.",["I understand. This one is cheaper, and the quality is still good.","Then don't buy it.","Everything is expensive."],"Tawarkan alternatif dengan sopan."),
+  T("Describing a product","This phone case is ___ (strong) than the old model.",["stronger"],"Kata sifat pendek + -er + than.","Casing HP ini lebih kuat daripada model lama."),
+  T("Describing a product","It is the ___ (popular) snack in our shop.",["most popular"],"Superlatif kata sifat panjang: the most + adjective.","Ini camilan paling laris di toko kami."),
+  E("Last month our shop sell 300 bottles of coconut oil.","sell","sold",PAST),
+  L("Our new coffee is made from local beans.",["Kopi baru kami dibuat dari biji kopi lokal.","Kopi baru kami diimpor dari luar negeri.","Kopi baru kami belum dijual."],"Local beans = biji kopi lokal."),
+  D("Customer","The product I received is broken.","Produk yang saya terima rusak.",["I'm sorry to hear that. Could you send us a photo? We will replace it.","That's not our problem.","Please buy another one."],"Minta maaf, minta bukti, tawarkan penggantian."),
+  E("Yesterday many customers visits our booth at the bazaar.","visits","visited",PAST)]},
+ {title:"Rencana Pemasaran",en:"Marketing Plan",brief:"Tulis laporan penjualan dan yakinkan manajer dengan rencana pemasaranmu.",items:[
+  C("SALES REPORT: September","Sales increased by 30% ___ we started using short videos.",["after","before","unless"],"After = setelah. Penjualan naik setelah memakai video pendek."),
+  T("SALES REPORT","Online sales were higher ___ offline sales.",["than"],"Perbandingan: higher … than."),
+  C("Recommendation","I suggest ___ a discount for students on weekends.",["giving","give","gave"],"Suggest + verb-ing."),
+  C("Target market","Our customers are young people ___ like healthy snacks.",["who","which","where"],"Adjective clause untuk orang: who."),
+  E("The customer told me that she want a refund.","want","wanted",REP),
+  A("Kita sebaiknya bekerja sama dengan influencer lokal.","We should work with local influencers.","Should = sebaiknya (memberi saran)."),
+  D("Manager","Why should we use social media instead of posters?","Kenapa kita harus pakai media sosial, bukan poster?",["Most of our customers are online every day, and social media costs less to reach them.","Because posters are ugly.","I don't know."],"Argumen yang kuat memakai fakta dan alasan."),
+  T("Indirect speech","Direct: 'I love this product.' → The customer said that she ___ the product.",["loved"],REP)]}
+ ]},
+{key:"mplb",title:"Office Heroes",dept:"Manajemen Perkantoran & Layanan Bisnis",ico:"🗂️",place:"Kantor & front office",
+ intro:"Kamu staf administrasi. Kenali perlengkapan kantor, ikuti SOP administrasi, layani tamu dan telepon, lalu tulis email resmi dan notulen.",
+ missions:[
+ {title:"Resepsionis Baru",en:"The New Receptionist",brief:"Sapa tamu, catat nomor telepon dan jadwal, tunjukkan letak benda.",items:[
+  D("Visitor","Good afternoon. Is this the front office?","Selamat siang. Apakah ini front office?",["Good afternoon. Yes, it is. How can I help you?","Good night.","I'm an office."],"Balas salam yang sama, jawab pertanyaan, tawarkan bantuan."),
+  X("Tulis nomor yang kamu dengar.","zero eight one two",["0812"],"Zero = 0, eight = 8, one = 1, two = 2."),
+  L("The meeting is on Tuesday at two o'clock.",["Rapatnya hari Selasa pukul dua.","Rapatnya hari Kamis pukul dua.","Rapatnya hari Selasa pukul sepuluh."],"Tuesday = Selasa. Thursday = Kamis."),
+  C("Office directory","The director's office is on the ___ floor.",["second","two","twice"],"Lantai memakai bilangan bertingkat: first, second, third.","Ruang direktur ada di lantai dua."),
+  C("Daily routine","Ms. Rina ___ the letters every morning.",["types","type","typing"],SP,"Bu Rina mengetik surat setiap pagi."),
+  M("The printer is between the window and the door.",["Printernya ada di antara jendela dan pintu.","Printernya ada di depan jendela.","Printernya ada di dekat lemari."],"Between = di antara."),
+  X("Tulis nama bulan yang kamu dengar.","September",["september"],"September. Ejaan: S-E-P-T-E-M-B-E-R."),
+  C("On the phone","Could you ___ your name, please?",["spell","spill","speak"],"Spell = mengeja.","Bisakah Anda mengeja nama Anda?")]},
+ {title:"Pekan Sibuk",en:"A Busy Week",brief:"Ceritakan pekerjaan yang sudah selesai dan tanggapi permintaan rekan kerja.",items:[
+  C("Yesterday","Yesterday I ___ twenty letters.",["sent","send","sends"],"Send adalah kata kerja tidak beraturan: send → sent.","Kemarin saya mengirim dua puluh surat."),
+  C("Last Friday","The manager ___ come to the office last Friday.",["didn't","doesn't","wasn't"],DN,"Manajer tidak datang ke kantor Jumat lalu."),
+  D("Boss","Did you call the hotel?","Apakah kamu sudah menelepon hotel?",["Yes, I did. The room is booked.","Yes, I do.","No, I am."],DQ),
+  D("Colleague","Can you make copies of this document?","Bisakah kamu memfotokopi dokumen ini?",["Sure. How many copies do you need?","No, I can't swim.","It's a document."],"Jawab bisa, lalu tanyakan detailnya."),
+  M("I think we should start the meeting now.",["Menurut saya kita sebaiknya mulai rapat sekarang.","Rapatnya sudah selesai.","Saya tidak ikut rapat."],"Should = sebaiknya."),
+  C("Feelings","I was ___ because the printer stopped during the meeting.",["nervous","noisy","new"],"Nervous = gugup.","Saya gugup karena printernya mati saat rapat."),
+  T("Welcoming guests","When the guests ___ (arrive), I gave them the agenda.",["arrived"],"When + kejadian lampau: arrive → arrived.","Ketika para tamu tiba, saya memberi mereka agenda."),
+  C("Phone manners","Please answer the phone ___.",["politely","polite","police"],"Adverb (kata keterangan cara) biasanya berakhiran -ly.","Tolong angkat telepon dengan sopan.")]},
+ {title:"Meja Kantor",en:"The Office Desk",brief:"Kepala bagian meminta perlengkapan kantor dan memberi informasi singkat.",items:[
+  P("Pass me the paper clip.","Berikan klip kertasnya.",[["📎","paper clip"],["📌","pin"],["✂️","scissors"]],"A paper clip holds papers together."),
+  P("Put the letter in the envelope.","Masukkan surat ke amplop.",[["✉️","envelope"],["📁","folder"],["📅","calendar"]],"An envelope is for sending letters. (Amplop.)"),
+  P("Please answer the phone.","Tolong angkat teleponnya.",[["☎️","phone"],["🖨️","printer"],["💻","laptop"]],"Answer the phone = mengangkat telepon."),
+  P("Check the calendar.","Periksa kalendernya.",[["📅","calendar"],["📎","paper clip"],["✉️","envelope"]],"A calendar shows dates and schedules."),
+  P("File the documents in the folder.","Simpan dokumen di map.",[["📁","folder"],["✂️","scissors"],["☎️","phone"]],"File (verb) = mengarsipkan/menyimpan dokumen."),
+  L("The meeting starts at ten.",["Rapat dimulai pukul sepuluh.","Rapat selesai pukul sepuluh.","Rapatnya dibatalkan."],"Start = mulai."),
+  L("Please make five copies of this letter.",["Tolong buat lima salinan surat ini.","Tolong kirim lima surat ini.","Tolong baca surat ini lima kali."],"Copies = salinan/fotokopi."),
+  M("Mr. Hasan is out of the office today.",["Pak Hasan tidak di kantor hari ini.","Pak Hasan lembur hari ini.","Pak Hasan pindah kantor hari ini."],"Out of the office = sedang tidak di kantor.")]},
+ {title:"SOP Administrasi",en:"Office Procedures",brief:"Ikuti prosedur menerima telepon dan menyiapkan ruang rapat.",items:[
+  O("SOP: Receiving a phone call",["First, answer the phone and say the company name.","Then, ask for the caller's name.","Next, write down the message.","Finally, give the message to the right person."],ORD),
+  A("Mohon tunggu sebentar.","Please hold on a moment.","Hold on = menunggu (di telepon)."),
+  C("Filing rule","Put the files in ___ order, from A to Z.",["alphabetical","delicious","noisy"],"Urutan A sampai Z = alphabetical.","Susun berkas sesuai abjad, dari A sampai Z."),
+  O("SOP: Preparing a meeting room",["First, book the room for the right time.","Then, arrange the chairs and the table.","After that, set up the projector.","Finally, put water and the agenda on the table."],ORD),
+  M("Please sign the attendance list.",["Mohon tanda tangani daftar hadir.","Mohon baca daftar menu.","Mohon kirim surat lamaran."],"Attendance list = daftar hadir."),
+  C("Email rule","Always write a clear ___ line in your email.",["subject","object","kitchen"],"Subject line = perihal/judul email.","Selalu tulis perihal email yang jelas."),
+  A("Simpan dokumen penting di lemari arsip.","Keep important documents in the filing cabinet.","Filing cabinet = lemari arsip."),
+  C("Supervisor's advice","You had better ___ the email before you send it.",["check","checked","checking"],HB,"Sebaiknya kamu memeriksa email sebelum mengirimnya.")]},
+ {title:"Front Office",en:"Front Office",brief:"Sambut tamu, terima telepon, catat pesan, dan deskripsikan kantor.",items:[
+  D("Visitor","Good morning. I have an appointment with Ms. Rina.","Selamat pagi. Saya ada janji dengan Bu Rina.",["Good morning. May I have your name, please?","She is busy. Go home.","Appointments are boring."],"Sapa tamu dan tanyakan namanya dengan sopan."),
+  D("Caller","Can I speak to the manager?","Bisa bicara dengan manajer?",["I'm sorry, he is in a meeting. May I take a message?","No.","Who are you? Why?"],"Jika orangnya tidak ada, tawarkan untuk mencatat pesan."),
+  T("Taking a message","Mr. Budi ___ (call) at 10 a.m. this morning.",["called"],"Kejadian yang sudah terjadi pagi tadi memakai past tense: called.","Pak Budi menelepon pukul 10 pagi tadi."),
+  E("Yesterday the director sign all the letters.","sign","signed",PAST),
+  L("Could you send the agenda to all participants by email?",["Bisakah kamu mengirim agenda ke semua peserta lewat email?","Bisakah kamu mencetak agenda untuk direktur?","Bisakah kamu membatalkan rapat?"],"Send … by email = kirim lewat email."),
+  T("Describing the office","Our new meeting room is ___ (big) than the old one.",["bigger"],"big → bigger (huruf g digandakan).","Ruang rapat baru kami lebih besar dari yang lama."),
+  D("Visitor","Where is the finance department?","Di mana bagian keuangan?",["It's on the second floor, next to the elevator.","It's finance.","I don't work here."],"Beri petunjuk arah yang jelas."),
+  E("While I was typing the report, the printer stop working.","stop","stopped","Past progressive (was typing) + past simple (stopped).")]},
+ {title:"Surat & Notulen",en:"Letters & Minutes",brief:"Tulis email resmi dan notulen rapat, lalu beri saran kepada direktur.",items:[
+  C("FORMAL EMAIL","Dear Mr. Lee, I am writing to ___ our meeting on Monday.",["confirm","eat","shout"],"Confirm = mengonfirmasi."),
+  T("FORMAL EMAIL: closing","I look forward to ___ from you.",["hearing"],"Ungkapan tetap: look forward to + verb-ing (hear → …)."),
+  C("MINUTES OF MEETING","The manager said that the office ___ close early on Friday.",["would","will","is"],REP),
+  E("The participants discussed the budget and agree on a new schedule.","agree","agreed","Kedua kata kerja harus sama-sama past tense: discussed … agreed."),
+  C("MINUTES OF MEETING","The staff ___ attended the training will get a certificate.",["who","which","where"],"Adjective clause untuk orang: who."),
+  A("Rapat ditunda karena direktur sedang sakit.","The meeting was postponed because the director was sick.","Postponed = ditunda. Gunakan was + V3 (pasif)."),
+  D("Director","Should we hold the meeting online or offline?","Sebaiknya rapat diadakan daring atau luring?",["I suggest online, because three participants are outside the city and it saves travel costs.","Online, please. I like pajamas.","Both are bad."],"Saran profesional disertai alasan."),
+  T("Indirect speech","Direct: 'I am busy.' → Ms. Rina said that she ___ busy.",["was"],REP)]}
+ ]},
+{key:"dkv",title:"Pixel Studio",dept:"Desain Komunikasi Visual",ico:"🎨",place:"Studio desain",
+ intro:"Kamu desainer junior di studio kreatif. Kenali alat desain, ikuti proses kerja, temui klien, lalu presentasikan karyamu.",
+ missions:[
+ {title:"Kenalan dengan Klien",en:"Meet the Client",brief:"Kenalkan dirimu, dengarkan warna dan ukuran, dan letakkan elemen desain.",items:[
+  D("Client","Hi, I'm Andi. Are you the designer?","Hai, saya Andi. Apakah kamu desainernya?",["Yes, I am. Nice to meet you, Andi.","Yes, I do.","I'm a poster."],"Are you …? dijawab Yes, I am / No, I'm not."),
+  L("Use yellow and green for the background.",["Gunakan kuning dan hijau untuk latar.","Gunakan merah dan biru untuk latar.","Gunakan kuning dan hijau untuk huruf."],"Yellow = kuning, green = hijau, background = latar."),
+  X("Tulis warna yang kamu dengar.","orange",["orange"],"Oranye. Ejaan: O-R-A-N-G-E."),
+  C("Layout","Put the logo ___ the top of the page.",["at","in","on"],"Frasa tetap: at the top (di bagian atas).","Letakkan logo di bagian atas halaman."),
+  C("Daily routine","The designer ___ sketches every morning.",["draws","draw","drawing"],SP,"Desainer itu menggambar sketsa setiap pagi."),
+  M("The brushes are under the table.",["Kuasnya ada di bawah meja.","Kuasnya ada di atas meja.","Kuasnya ada di samping meja."],"Under = di bawah."),
+  X("Berapa ukuran hurufnya? Tulis angkanya.","twelve",["12","twelve"],"Twelve = 12. Hati-hati, twenty = 20."),
+  C("Deadline","The deadline is ___ Friday.",["on","in","at"],"Untuk nama hari gunakan on: on Friday.","Batas waktunya hari Jumat.")]},
+ {title:"Draf Pertama",en:"The First Draft",brief:"Ceritakan proses desain yang sudah kamu kerjakan dan tanggapi permintaan klien.",items:[
+  C("Yesterday","Yesterday I ___ three logo ideas.",["drew","draw","draws"],"Draw adalah kata kerja tidak beraturan: draw → drew.","Kemarin saya menggambar tiga ide logo."),
+  C("Feedback","The client ___ like the first draft.",["didn't","doesn't","wasn't"],DN,"Klien tidak suka draf pertama."),
+  D("Senior designer","Did you save the file?","Apakah kamu sudah menyimpan filenya?",["Yes, I did. It's in the project folder.","Yes, I do.","No, it isn't."],DQ),
+  D("Client","Can you make the logo bigger?","Bisakah logonya dibuat lebih besar?",["Yes, I can. I'll send the new version today.","No, I can't sing.","Yes, it's big."],"Can you …? dijawab Yes, I can, lalu beri kepastian."),
+  M("I think the blue version looks more modern.",["Menurut saya versi biru terlihat lebih modern.","Versi biru terlihat kuno.","Saya tidak suka versi biru."],"I think = menurut saya. More modern = lebih modern."),
+  C("Feelings","I was ___ when the client loved my design.",["proud","loud","cloud"],"Proud = bangga.","Saya bangga ketika klien menyukai desain saya."),
+  T("Sending the work","When I ___ (finish) the poster, I sent it to the client.",["finished"],"When + kejadian lampau: finish → finished.","Ketika saya selesai membuat poster, saya mengirimkannya ke klien."),
+  C("Safety","Cut the paper ___ with the cutter.",["carefully","careful","carefulness"],"Adverb (kata keterangan cara) biasanya berakhiran -ly.","Potong kertasnya dengan hati-hati memakai cutter.")]},
+ {title:"Meja Desainer",en:"The Designer's Desk",brief:"Desainer senior meminta alat dan memberi masukan singkat.",items:[
+  P("Pick up the pencil.","Ambil pensilnya.",[["✏️","pencil"],["🖌️","brush"],["📐","ruler"]],"You sketch ideas with a pencil."),
+  P("Choose a color palette.","Pilih palet warna.",[["🎨","palette"],["🖼️","poster"],["✂️","scissors"]],"A palette holds many colors."),
+  P("Hang the poster on the wall.","Gantung posternya di dinding.",[["🖼️","poster"],["🎨","palette"],["💻","laptop"]],"A poster is a big printed picture."),
+  P("Use the ruler to draw a straight line.","Gunakan penggaris untuk menggambar garis lurus.",[["📐","ruler"],["✏️","pencil"],["🖍️","crayon"]],"A ruler helps you draw straight lines."),
+  P("Open the laptop.","Buka laptopnya.",[["💻","laptop"],["📷","camera"],["🖨️","printer"]],"Designers use a laptop to make digital designs."),
+  L("Make the font bigger.",["Perbesar hurufnya.","Ganti warna hurufnya.","Hapus hurufnya."],"Font = jenis huruf. Bigger = lebih besar."),
+  L("The client likes bright colors.",["Klien suka warna cerah.","Klien suka warna gelap.","Klien tidak suka warna."],"Bright = cerah. Dark = gelap."),
+  M("Send me the draft by Monday.",["Kirimi saya draf paling lambat hari Senin.","Kirimi saya hasil akhir hari Minggu.","Draf sudah dikirim hari Senin."],"By Monday = paling lambat Senin.")]},
+ {title:"Proses Desain",en:"Design Process",brief:"Ikuti proses membuat poster dan menyiapkan file cetak.",items:[
+  O("SOP: Designing a poster",["First, read the client's brief carefully.","Then, sketch some ideas on paper.","After that, create the design on the computer.","Finally, send the draft and ask for feedback."],ORD),
+  A("Pilih warna yang cocok dengan merek.","Choose colors that match the brand.","Match = cocok dengan."),
+  C("Layout tip","Put the title at the ___ of the poster.",["top","taste","price"],"Judul biasanya di bagian atas (top).","Letakkan judul di bagian atas poster."),
+  M("Save the file as a PDF.",["Simpan file sebagai PDF.","Hapus file PDF itu.","Cetak file PDF itu."],"Save = simpan."),
+  O("SOP: Preparing a file for printing",["First, check the size of the design.","Then, change the color mode to CMYK.","Next, export the file in high resolution.","Finally, send the file to the printing shop."],ORD),
+  C("Feedback","The text is too small. Please ___ it.",["enlarge","delete","eat"],"Enlarge = memperbesar.","Teksnya terlalu kecil. Tolong perbesar."),
+  A("Gunakan tidak lebih dari tiga jenis huruf.","Use no more than three fonts.","No more than = tidak lebih dari."),
+  C("Senior designer's advice","You had better ___ a backup of your files.",["make","made","making"],HB,"Sebaiknya kamu membuat cadangan file-filemu.")]},
+ {title:"Bertemu Klien",en:"Meeting the Client",brief:"Diskusikan brief dengan klien, terima masukan, dan deskripsikan desainmu.",items:[
+  D("Client","Can you design a logo for my coffee shop?","Bisakah kamu mendesain logo untuk kedai kopi saya?",["Sure. Could you tell me about your shop and your customers?","Logos are easy.","No, I only draw cats."],"Sebelum mendesain, pahami dulu klien dan pelanggannya."),
+  D("Client","I don't like the colors in this draft.","Saya tidak suka warna di draf ini.",["Thank you for the feedback. Which colors would you prefer?","Then design it yourself.","The colors are perfect."],"Terima masukan dengan sopan, lalu tanyakan keinginan klien."),
+  T("Describing a design","The new logo is ___ (simple) than the old one.",["simpler"],"simple → simpler.","Logo baru lebih sederhana daripada yang lama."),
+  E("Last week our team finish the banner for the festival.","finish","finished",PAST),
+  L("The background is too dark, so the text is hard to read.",["Latarnya terlalu gelap, jadi teksnya sulit dibaca.","Latarnya terlalu terang, jadi teksnya jelas.","Teksnya terlalu besar untuk latarnya."],"Background = latar. Hard to read = sulit dibaca."),
+  T("Describing a design","Blue is the ___ (important) color in this brand.",["most important"],"Superlatif kata sifat panjang: the most + adjective.","Biru adalah warna paling penting di merek ini."),
+  D("Client","When will the final design be ready?","Kapan desain akhirnya siap?",["I will send it on Thursday, after your last feedback.","Someday.","When I'm happy."],"Beri waktu yang jelas."),
+  E("While I was drawing the sketch, the client send a new idea.","send","sent","Past progressive (was drawing) + past simple: send → sent.")]},
+ {title:"Presentasi Karya",en:"Presenting Your Work",brief:"Presentasikan desain, jelaskan revisi, dan laporkan kepada art director.",items:[
+  C("DESIGN PRESENTATION","I chose green ___ it shows that the product is natural.",["because","although","unless"],"Menjelaskan alasan: because."),
+  C("DESIGN PRESENTATION","The logo, ___ uses a clove flower, shows the history of Maluku.",["which","who","when"],"Adjective clause untuk benda: which."),
+  T("Indirect speech","Direct: 'The font looks old.' → The client said that the font ___ old.",["looked"],REP),
+  E("Last Monday the client said that he likes the second draft.","likes","liked",REP),
+  A("Saya menyarankan memakai foto asli produk.","I suggest using real photos of the product.","Suggest + verb-ing."),
+  C("Explaining revisions","We made the text bigger ___ older customers can read it easily.",["so that","although","but"],"So that = supaya (tujuan)."),
+  D("Client","Why is the design so simple?","Kenapa desainnya sangat sederhana?",["A simple design is easier to remember, and it looks good on small screens like phones.","Because I was lazy.","Simple is simple."],"Pertahankan desainmu dengan alasan yang kuat."),
+  T("Report to art director","The client ___ (approve) the final design yesterday.",["approved"],PAST)]}
+ ]}
+];
+
+/* ---------- EXTRA CONTENT: reading, speaking, argument, writing ---------- */
+const R=(kind,title,text,qs)=>({t:"read",kind,title,text,qs});
+const Q=(q,o,hint,imp)=>({q,o,hint,imp:!!imp});
+const SAY=(say,tr,tip)=>({t:"say",say,tr,tip});
+const ARG=(who,say,tr,o,hint)=>({t:"arg",who,say,tr,o,hint});
+const WR=(task,model,frame,checks,min)=>({t:"write",task,model,frame,checks,min:min||30});
+const ARGH="Argumen yang kuat: akui pendapat lawan bicara, beri data atau fakta, lalu tawarkan solusi dengan alasan.";
+const EXTRA={
+acc:{
+ 0:[SAY("Good morning. My name is Dimas. I work in the finance department.","Selamat pagi. Nama saya Dimas. Saya bekerja di bagian keuangan.","Ucapkan pelan dan jelas. Tekanan suara pada FI-nance dan de-PART-ment.")],
+ 1:[SAY("Yesterday I checked ten receipts and counted the cash.","Kemarin saya memeriksa sepuluh kuitansi dan menghitung uang kas.","Akhiran -ed: checked dibaca 'chekt', counted dibaca 'coun-tid'.")],
+ 2:[R("NOTICE","Finance Office Hours","FINANCE OFFICE\nOpen: Monday – Friday, 08.00 – 15.00\nBreak: 12.00 – 13.00\nPayments after 14.30 will be recorded on the next working day.\nPlease bring your receipt.",[
+   Q("When is the finance office closed for a break?",["12.00 – 13.00","08.00 – 15.00","After 14.30"],"Cari kata 'Break'."),
+   Q("A customer pays at 14.45 on Friday. When will the payment be recorded?",["On Monday","On Friday","On Saturday"],"Setelah 14.30 dicatat pada hari kerja berikutnya. Sabtu bukan hari kerja.",true)])],
+ 3:[R("SOP","Petty Cash Rules","PETTY CASH RULES\n1. The maximum petty cash payment is Rp500.000.\n2. Every payment needs a receipt.\n3. Payments above Rp500.000 must use a bank transfer and need the manager's signature.\n4. Count the petty cash every Friday afternoon.",[
+   Q("How often do staff count the petty cash?",["Once a week","Every day","Once a month"],"Every Friday = sekali seminggu.",true),
+   Q("A staff member needs Rp750.000 for a new printer. What must she do?",["Use a bank transfer and get the manager's signature","Take the money from petty cash","Pay without a receipt"],"Lihat aturan nomor 3: di atas Rp500.000.",true)])],
+ 4:[R("EMAIL","Re: Invoice INV-0457","From: Sari (Toko Maju)\nTo: Finance Staff\nSubject: Re: Invoice INV-0457\n\nHello,\nI received your invoice for Rp4.200.000 yesterday. However, we only ordered 30 boxes of paper, not 35. Each box costs Rp120.000. Could you please send a new invoice?\nThank you,\nSari",[
+   Q("What does Sari want?",["A new invoice","A discount","More boxes of paper"],"Lihat kalimat 'Could you please…'."),
+   Q("What is the correct total for the new invoice?",["Rp3.600.000","Rp4.200.000","Rp120.000"],"30 boxes × Rp120.000 = Rp3.600.000.",true),
+   Q("How does Sari probably feel?",["Polite, but she wants the mistake fixed","Very angry","Happy with the invoice"],"Ia memakai kata sopan (please, thank you) tetapi menunjukkan kesalahan.",true)]),
+   SAY("Could you please check the invoice? I think the total is wrong.","Bisakah Anda memeriksa fakturnya? Menurut saya totalnya salah.","Naikkan nada suara di akhir pertanyaan: '…check the invoice?'")],
+ 5:[R("REPORT","Café Senja – Three-Month Summary","CAFÉ SENJA – SUMMARY\nMonth | Income | Expenses\nAugust | Rp10.800.000 | Rp8.900.000\nSeptember | Rp11.000.000 | Rp9.000.000\nOctober | Rp12.000.000 | Rp9.500.000\n\nNote: Electricity cost went up in October because the café added two new freezers.",[
+   Q("In which month was the profit the highest?",["October","August","September"],"Laba = income − expenses: Agustus 1,9 juta; September 2 juta; Oktober 2,5 juta.",true),
+   Q("Why did expenses go up in October?",["The café added two new freezers","Coffee prices went down","The café closed for a week"],"Baca bagian Note."),
+   Q("What can you infer about the café's business?",["It is growing every month","It is losing money","Its income is going down"],"Pendapatan naik dari Agustus sampai Oktober.",true)]),
+   ARG("Owner","I want to cut the staff salaries to save money. What do you think?","Saya ingin memotong gaji staf untuk berhemat. Bagaimana menurutmu?",["I understand, but our profit is growing. I suggest we reduce electricity use first, because cutting salaries can make good staff leave.","Yes, cut everything now.","I don't care about money."],ARGH),
+   WR("Tulis email singkat (minimal 30 kata) kepada pemilik Café Senja tentang hasil bulan Oktober. Sebutkan laba, alasan kenaikan biaya, dan satu rekomendasi.",
+    "Dear Mrs. Lestari,\nI am writing to report the October result. Our income was Rp12.000.000 and our expenses were Rp9.500.000, so we made a profit of Rp2.500.000. The expenses went up because we added two new freezers. I recommend turning off one freezer at night to save electricity.\nBest regards,\nDimas",
+    "Dear …,\nI am writing to report … Our income was … and our expenses were …, so we made a profit of … The expenses went up because … I recommend …\nBest regards,\n…",
+    [["Salam pembuka (Dear …)","\\bdear\\b"],["Menyebut angka atau laba","\\d|profit"],["Memberi alasan (because)","\\bbecause\\b"],["Memberi rekomendasi (recommend/suggest)","recommend|suggest"],["Salam penutup (regards/thank you)","regards|thank"]])]
+},
+tou:{
+ 0:[SAY("Good morning, everyone. Welcome to Bacan Island. My name is Rani, and I am your guide today.","Selamat pagi semuanya. Selamat datang di Pulau Bacan. Nama saya Rani, saya pemandu kalian hari ini.","Tersenyum saat mengucapkan 'Welcome'. Suara jelas dan cukup keras untuk rombongan.")],
+ 1:[SAY("Last weekend, we visited the waterfall and swam in the river.","Akhir pekan lalu kami mengunjungi air terjun dan berenang di sungai.","Visited dibaca 'vi-zi-tid'. Swam adalah bentuk lampau dari swim.")],
+ 2:[R("SIGN","Harbor Notice","HARBOR NOTICE\nBoats to the islands: 08.00 and 13.00\nTicket: Rp75.000 (adult) · Rp40.000 (child under 12)\nLife jackets are free.\nNo boats when the wind is strong.",[
+   Q("How much does a ticket for a 10-year-old child cost?",["Rp40.000","Rp75.000","It is free"],"Anak di bawah 12 tahun: Rp40.000."),
+   Q("Today the wind is very strong. What will happen?",["The boats will not leave","The tickets will be free","The boats will leave at 13.00 only"],"Baca baris terakhir.",true)])],
+ 3:[R("RULES","Snorkeling Safety Rules","SNORKELING SAFETY RULES\n• Always swim with a buddy.\n• Do not touch or stand on the coral.\n• Stay inside the area with the yellow buoys.\n• Come back to the boat when you hear three whistles.",[
+   Q("What should guests do when they hear three whistles?",["Return to the boat","Swim to the yellow buoys","Look for coral"],"Lihat aturan terakhir."),
+   Q("Why do guests probably need to stay inside the yellow buoys?",["Because it is the safe area","Because the coral is outside","Because boats are not allowed there"],"Aturan dibuat untuk keselamatan tamu.",true)])],
+ 4:[R("BROCHURE","Explore Bacan – 2 Days","EXPLORE BACAN – 2 DAYS, 1 NIGHT\nDay 1: Arrive at Labuha harbor, visit the old Barnaveld fort, watch the sunset at the beach.\nDay 2: Snorkeling at a small island, lunch with grilled fish, return at 15.00.\nPrice: Rp1.250.000/person (hotel, meals and boat included). Minimum 4 people.",[
+   Q("What do guests do on the first day?",["Visit an old fort and watch the sunset","Go snorkeling","Eat grilled fish for lunch"],"Lihat Day 1."),
+   Q("Two friends want to book this tour. What is the problem?",["The tour needs at least four people","The tour is too short","The hotel is not included"],"Minimum 4 people.",true),
+   Q("Who is this tour probably best for?",["Small groups who like history and the sea","People who want to stay for a week","Tourists who are afraid of boats"],"Isinya benteng (sejarah) dan laut.",true)]),
+   SAY("This fort was built a long time ago to protect the spice trade.","Benteng ini dibangun lama sekali untuk melindungi perdagangan rempah.","Built dibaca 'bilt'. Beri jeda kecil setelah 'ago'.")],
+ 5:[R("REVIEW","Guest Review","★★☆☆☆  \"Beautiful island, but…\"\nThe beach was amazing and our guide was friendly. However, the boat left one hour late, and nobody told us why. Lunch was cold. I will only come back if the company improves its communication.\n– Mark, Australia",[
+   Q("What did Mark like?",["The beach and the guide","The boat and the lunch","The communication"],"Lihat kalimat pertama."),
+   Q("What is Mark's main complaint?",["Nobody explained the delay","The guide was rude","The beach was dirty"],"'nobody told us why'",true),
+   Q("What should the company do first?",["Tell guests quickly when there is a delay","Build a new beach","Change the guide"],"Ia mau kembali jika komunikasinya diperbaiki.",true)]),
+   ARG("Manager","Should we reply to this bad review or just ignore it?","Haruskah kita membalas ulasan buruk ini atau mengabaikannya?",["We should reply, apologize and explain how we will improve, because other tourists will read our answer.","Ignore it. Reviews don't matter.","Delete our page."],ARGH),
+   WR("Tulis balasan (minimal 30 kata) untuk ulasan Mark. Ucapkan terima kasih, minta maaf, jelaskan perbaikan, dan undang dia datang lagi.",
+    "Dear Mark,\nThank you for your review. We are very sorry that the boat was late and that nobody explained the delay. From now on, our guides will inform guests immediately if there is a problem. We hope you will visit Bacan again.\nBest regards,\nIsland Guide Team",
+    "Dear …,\nThank you for … We are very sorry that … From now on, we will … We hope you will …\nBest regards,\n…",
+    [["Salam pembuka (Dear …)","\\bdear\\b"],["Ucapan terima kasih","thank"],["Permintaan maaf (sorry/apologize)","sorry|apologi"],["Rencana perbaikan (will …)","\\bwill\\b"],["Undangan datang lagi (again/visit)","again|visit|come back"]])]
+},
+mkt:{
+ 0:[SAY("Hello! Welcome to our shop. Our snacks are fresh and cheap.","Halo! Selamat datang di toko kami. Camilan kami segar dan murah.","Ucapkan dengan ramah dan bersemangat, seperti menyapa pembeli sungguhan.")],
+ 1:[SAY("Yesterday we sold fifty boxes of cookies at the bazaar.","Kemarin kami menjual lima puluh kotak kue di bazar.","Fifty (50) tekanannya di depan: FIF-ty. Fifteen (15) di belakang: fif-TEEN.")],
+ 2:[R("PRICE LIST","Kedai Rempah","KEDAI REMPAH – PRICE LIST\nClove tea (box of 20) … Rp35.000\nNutmeg candy (pack) … Rp15.000\nCinnamon cookies (jar) … Rp45.000\nSpecial: Buy 2 packs of nutmeg candy, get 1 free!",[
+   Q("How much is a jar of cinnamon cookies?",["Rp45.000","Rp35.000","Rp15.000"],"Cari 'Cinnamon cookies'."),
+   Q("A customer buys two packs of nutmeg candy. How many packs does she get?",["Three","Two","Four"],"Buy 2, get 1 free.",true)])],
+ 3:[R("GUIDE","How to Write a Good Caption","HOW TO WRITE A GOOD CAPTION\n1. Start with a question or a surprising fact.\n2. Say what the product does for the customer.\n3. Keep it under 30 words.\n4. End with a call to action, for example: \"Order now!\"",[
+   Q("How should a caption end?",["With a call to action","With a long story","With the price only"],"Lihat langkah 4."),
+   Q("Which caption follows the guide best?",["Tired in the afternoon? Our clove tea gives you fresh energy. Order now!","Clove tea. It is tea. We sell it.","Our company started in 2010 and we have many products, many workers and a big office in the city."],"Cek: pertanyaan, manfaat, singkat, ajakan.",true)])],
+ 4:[R("CHAT","Customer Chat","Customer (10:02): Hi, I ordered 3 jars of cinnamon cookies on Monday. Today is Thursday and I still haven't received them.\nCustomer (10:03): The tracking number doesn't work.\nCustomer (10:15): Hello?? Is anyone there?",[
+   Q("What is the customer's problem?",["Her order has not arrived","The cookies taste bad","She wants a discount"],"Baca pesan pertama."),
+   Q("How does the customer feel at 10:15?",["Impatient, because nobody answered","Happy and relaxed","Confused about the price"],"Tanda tanya ganda dan 'Is anyone there?'",true),
+   Q("What should the shop do first?",["Apologize and check the tracking number","Send her a new price list","Wait until tomorrow"],"Pelanggan menunggu jawaban dan nomor resinya bermasalah.",true)]),
+   SAY("I'm sorry for the delay. Let me check your order right now.","Mohon maaf atas keterlambatannya. Saya cek pesanan Anda sekarang juga.","Nada tenang dan sopan. Tekanan pada SOR-ry dan right NOW.")],
+ 5:[R("DATA","Promotion Results – September","PROMOTION RESULTS – SEPTEMBER\nChannel | Cost | New customers\nPosters | Rp500.000 | 10\nInstagram videos | Rp300.000 | 45\nRadio | Rp1.000.000 | 15",[
+   Q("Which channel brought the most new customers?",["Instagram videos","Radio","Posters"],"Lihat kolom New customers."),
+   Q("Which channel was the most expensive for each new customer?",["Radio","Posters","Instagram videos"],"Radio ±Rp66.700 per orang, poster Rp50.000, video ±Rp6.700.",true),
+   Q("What is the best conclusion?",["Instagram videos were the cheapest and most effective channel","Posters worked better than videos","Radio should get more money"],"Bandingkan biaya dan hasilnya.",true)]),
+   ARG("Manager","Radio is famous. Why should we stop the radio ads?","Radio itu terkenal. Kenapa kita harus berhenti beriklan di radio?",["Radio cost Rp1.000.000 but brought only 15 customers, while videos brought 45 for Rp300.000. We can move the money to videos.","Because I don't like radio.","Radio is old."],ARGH),
+   WR("Tulis pesan (minimal 30 kata) kepada manajer: laporkan hasil promosi September dan usulkan rencana untuk bulan Oktober.",
+    "Dear Mr. Fadli,\nI would like to report the September promotion results. Instagram videos brought 45 new customers for only Rp300.000, while radio brought 15 customers for Rp1.000.000. I suggest using the radio budget for more videos in October because they are cheaper and more effective.\nBest regards,\nNisa",
+    "Dear …,\nI would like to report … brought … new customers, while … I suggest … because …\nBest regards,\n…",
+    [["Salam pembuka (Dear …)","\\bdear\\b"],["Menyebut data (angka)","\\d"],["Membandingkan (while/but/than)","\\bwhile\\b|\\bbut\\b|\\bthan\\b"],["Memberi usulan (suggest/recommend)","suggest|recommend"],["Memberi alasan (because)","\\bbecause\\b"]])]
+},
+mplb:{
+ 0:[SAY("Good morning. Welcome to PT Maju Jaya. How can I help you?","Selamat pagi. Selamat datang di PT Maju Jaya. Ada yang bisa saya bantu?","Nada naik di akhir pertanyaan 'How can I help you?'")],
+ 1:[SAY("Yesterday I sent twenty letters and called the hotel.","Kemarin saya mengirim dua puluh surat dan menelepon hotel.","Called dibaca 'kold' (satu suku kata).")],
+ 2:[R("MEMO","Office Memo","MEMO\nTo: All staff\nFrom: Office Manager\nDate: 3 November\nThe photocopy machine on the second floor is broken. Please use the machine on the first floor until Friday. Thank you.",[
+   Q("Which photocopy machine can staff use now?",["The one on the first floor","The one on the second floor","No machine"],"Baca kalimat 'Please use…'."),
+   Q("When will the second-floor machine probably work again?",["After Friday","Today","Next year"],"'until Friday' = sampai hari Jumat.",true)])],
+ 3:[R("SOP","Visitor Procedure","VISITOR PROCEDURE\n1. Visitors sign the guest book at the front desk.\n2. The receptionist calls the staff member they want to meet.\n3. Visitors wear a visitor badge at all times.\n4. Visitors return the badge before they leave.",[
+   Q("What must visitors do before they leave?",["Return the badge","Sign the guest book","Call the staff"],"Lihat langkah 4."),
+   Q("A visitor walks to the second floor without a badge. Which rule did he break?",["Rule 3","Rule 1","Rule 4"],"Badge harus dipakai setiap saat (at all times).",true)])],
+ 4:[R("EMAIL","Monday Meeting – New Time","From: Ms. Rina (Director's Office)\nSubject: Monday meeting – new time\n\nDear team,\nThe Monday meeting will start at 13.00, not 09.00, because the director has a flight in the morning. The room has also changed to Meeting Room B. Please bring your monthly reports.\nRegards,\nRina",[
+   Q("What changed about the meeting?",["The time and the room","The day and the topic","Only the room"],"Baca kalimat pertama dan kedua."),
+   Q("Why can't the director come in the morning?",["She is travelling by plane","She is sick","She has another meeting"],"'has a flight' = naik pesawat.",true),
+   Q("What should staff prepare?",["Their monthly reports","A flight ticket","Meeting Room A"],"Lihat kalimat terakhir.")]),
+   SAY("I'm sorry, Ms. Rina is in a meeting. May I take a message?","Mohon maaf, Bu Rina sedang rapat. Boleh saya catat pesannya?","Nada sopan. Naikkan nada di akhir 'May I take a message?'")],
+ 5:[R("MINUTES","Minutes of Meeting","MINUTES OF MEETING\nDate: 10 November · Attendees: 8 · Absent: 2\n1. The team agreed to use online forms for leave requests.\n2. The budget for office supplies will decrease by 10%.\n3. Action: Dewi will train all staff on the online form before 20 November.\n4. Next meeting: 1 December.",[
+   Q("How many people were invited to the meeting?",["Ten","Eight","Two"],"Hadir 8 + tidak hadir 2.",true),
+   Q("Who will train the staff?",["Dewi","The director","All staff"],"Lihat poin 3."),
+   Q("What can you infer about paper leave forms?",["They will not be used anymore","They will be cheaper","They are more popular now"],"Tim sepakat memakai formulir online.",true)]),
+   ARG("Director","Online forms are complicated. Why not keep paper forms?","Formulir online itu rumit. Kenapa tidak tetap pakai kertas?",["Online forms are faster to check and save paper. Dewi will train everyone, so the change will not be difficult.","Because paper is boring.","I don't know."],ARGH),
+   WR("Tulis email (minimal 30 kata) kepada semua staf tentang perubahan jam dan ruang rapat hari Senin.",
+    "Dear all,\nI would like to inform you that the Monday meeting will start at 13.00 instead of 09.00 because the director has a morning flight. The meeting will be in Meeting Room B. Please bring your monthly reports.\nThank you,\nRina",
+    "Dear all,\nI would like to inform you that … will start at … instead of … because … The meeting will be in … Please bring …\nThank you,\n…",
+    [["Salam pembuka (Dear …)","\\bdear\\b"],["Menyebut jam baru","\\d"],["Memberi alasan (because)","\\bbecause\\b"],["Permintaan sopan (please)","\\bplease\\b"],["Salam penutup (thank you/regards)","thank|regards"]])]
+},
+dkv:{
+ 0:[SAY("Hi, I'm the designer. I like bright colors and simple shapes.","Hai, saya desainernya. Saya suka warna cerah dan bentuk sederhana.","Bright dibaca 'brait'. Shapes dibaca 'sheips'.")],
+ 1:[SAY("Yesterday I drew three logo ideas for the client.","Kemarin saya menggambar tiga ide logo untuk klien.","Drew dibaca 'droo'. Three: lidah di antara gigi untuk bunyi 'th'.")],
+ 2:[R("BRIEF","Mini Design Brief","DESIGN BRIEF\nClient: Kopi Pala\nProduct: Coffee shop poster\nSize: A3\nColors: brown and cream\nDeadline: Friday, 5 p.m.",[
+   Q("What size is the poster?",["A3","A4","A5"],"Lihat baris Size."),
+   Q("It is Friday at 6 p.m. and the poster is not finished. What is the problem?",["The deadline has passed","The colors are wrong","The size is too big"],"Deadline: Friday, 5 p.m.",true)])],
+ 3:[R("GUIDE","Kopi Pala Brand Guidelines","KOPI PALA BRAND GUIDELINES\n• Logo: always on a light background.\n• Minimum logo size: 3 cm.\n• Fonts: Poppins for titles, Lora for body text.\n• Never stretch or rotate the logo.",[
+   Q("Which font should you use for body text?",["Lora","Poppins","Any font"],"Lihat baris Fonts."),
+   Q("A designer puts the logo on a dark brown background. Is that correct?",["No, the logo must be on a light background","Yes, brown is a brand color","Yes, if the logo is rotated"],"Aturan pertama: light background.",true)])],
+ 4:[R("EMAIL","Poster Draft 1 – Feedback","From: Pak Hendra (Kopi Pala)\nSubject: Poster draft 1\n\nHi,\nThanks for the draft. I like the photo of the coffee cup. However, the title is too small and people can't read it from far away. Also, please add our Instagram account. The rest is fine.\nHendra",[
+   Q("What does Pak Hendra like?",["The photo of the coffee cup","The title","The size"],"Lihat 'I like…'."),
+   Q("Why does the title need to be bigger?",["People can't read it from far away","He doesn't like the font","The poster is too small"],"Baca kalimat setelah 'However'."),
+   Q("How many changes does he ask for?",["Two","One","Three"],"Judul diperbesar + tambah akun Instagram.",true)]),
+   SAY("Thank you for the feedback. I will make the title bigger and add your Instagram account.","Terima kasih atas masukannya. Saya akan memperbesar judul dan menambahkan akun Instagram Anda.","Feedback tekanannya di depan: FEED-back.")],
+ 5:[R("SURVEY","Logo Survey – 40 People","LOGO SURVEY – 40 RESPONDENTS\nLogo A (nutmeg icon, brown): 26 votes – \"easy to remember\", \"looks local\"\nLogo B (cup icon, black): 14 votes – \"modern\", \"too common\"",[
+   Q("Which logo got more votes?",["Logo A","Logo B","Both got the same"],"26 vs 14."),
+   Q("What is a weakness of Logo B?",["It looks too common","It is hard to remember","It looks too local"],"Lihat komentar untuk Logo B."),
+   Q("What should the designer recommend?",["Logo A, because most people found it memorable and local","Logo B, because black is modern","Neither logo"],"Gunakan data survei sebagai alasan.",true)]),
+   ARG("Client","Logo B looks more modern. Why do you recommend Logo A?","Logo B terlihat lebih modern. Kenapa kamu merekomendasikan Logo A?",["Logo A got 26 of 40 votes, and people said it is easy to remember and looks local. We can make it more modern with a simpler font.","Because I designed it.","Modern is bad."],ARGH),
+   WR("Tulis pesan presentasi singkat (minimal 30 kata) kepada klien: rekomendasikan satu logo dan jelaskan alasannya dengan data survei.",
+    "Dear Pak Hendra,\nI recommend Logo A for Kopi Pala. In our survey, 26 out of 40 people chose it because it is easy to remember and looks local. The nutmeg icon also shows the history of Maluku. We can use a simpler font to make it look more modern.\nBest regards,\nAyu",
+    "Dear …,\nI recommend … In our survey, … out of … people chose it because … The … also shows … We can …\nBest regards,\n…",
+    [["Salam pembuka (Dear …)","\\bdear\\b"],["Rekomendasi (recommend/suggest)","recommend|suggest"],["Menyebut data survei (angka)","\\d"],["Memberi alasan (because)","\\bbecause\\b"],["Salam penutup (regards/thank you)","regards|thank"]])]
+}};
+W.forEach(w=>{const ex=EXTRA[w.key]||{};Object.keys(ex).forEach(i=>w.missions[i].items.push(...ex[i]))});
+
+/* ---------- GLOSSARY ---------- */
+const GLOSS={
+acc:[["invoice","faktur / tagihan penjualan"],["receipt","kuitansi / struk"],["ledger","buku besar"],["balance","saldo"],["income","pendapatan"],["expense","pengeluaran / biaya"],["profit","laba"],["loss","rugi"],["due date","tanggal jatuh tempo"],["petty cash","kas kecil"],["transaction","transaksi"],["budget","anggaran"],["bank transfer","transfer bank"],["signature","tanda tangan"]],
+tou:[["itinerary","rencana perjalanan"],["booking","pemesanan"],["harbor","pelabuhan"],["destination","tujuan wisata"],["souvenir","oleh-oleh"],["life jacket","jaket pelampung"],["guide","pemandu"],["package","paket"],["delay","keterlambatan"],["complaint","keluhan"],["included","sudah termasuk"],["coral reef","terumbu karang"],["fort","benteng"],["sunset","matahari terbenam"]],
+mkt:[["target market","pasar sasaran"],["caption","keterangan unggahan"],["discount","potongan harga"],["promotion","promosi"],["brand","merek"],["stock","stok persediaan"],["refund","pengembalian dana"],["delivery","pengiriman"],["campaign","kampanye"],["feedback","masukan"],["sales","penjualan"],["call to action","ajakan bertindak"],["tracking number","nomor resi"],["new customer","pelanggan baru"]],
+mplb:[["appointment","janji temu"],["agenda","susunan acara rapat"],["minutes","notulen"],["memo","memo / nota dinas"],["attendance list","daftar hadir"],["filing cabinet","lemari arsip"],["envelope","amplop"],["visitor badge","kartu tamu"],["postpone","menunda"],["schedule","jadwal"],["receptionist","resepsionis"],["leave request","permohonan cuti"],["photocopy","fotokopi"],["take a message","mencatat pesan"]],
+dkv:[["brief","ringkasan permintaan klien"],["draft","rancangan"],["layout","tata letak"],["font","jenis huruf"],["color palette","palet warna"],["background","latar"],["sketch","sketsa"],["revision","revisi"],["deadline","batas waktu"],["resolution","resolusi"],["feedback","masukan"],["brand guidelines","pedoman merek"],["export","mengekspor file"],["approve","menyetujui"]]
+};
+
+/* ---------- ROLE-PLAY CARDS (speaking in class) ---------- */
+const ROLE={
+acc:[{title:"Tagihan yang membingungkan",sit:"Seorang klien datang karena tagihannya bulan ini lebih tinggi.",a:"Staf keuangan: sapa klien, periksa tagihan, jelaskan alasannya (ada denda keterlambatan), tawarkan solusi.",b:"Klien: tanyakan kenapa tagihan naik, minta penjelasan, tanyakan cara membayar.",ph:["Why is my bill higher this month?","Let me check your account.","This month includes a late payment fee.","You can pay by bank transfer before Friday."]},
+ {title:"Melapor kepada pemilik",sit:"Staf melaporkan hasil keuangan bulanan kepada pemilik usaha.",a:"Staf: sebutkan pendapatan, pengeluaran, laba, dan satu rekomendasi beserta alasan.",b:"Pemilik: tanyakan kenapa biaya naik dan apakah rekomendasinya masuk akal.",ph:["Our income was … and our expenses were …","We made a profit of …","The expenses went up because …","I recommend … because …"]}],
+tou:[{title:"Menyambut rombongan",sit:"Rombongan turis tiba di pelabuhan Labuha.",a:"Pemandu: sambut tamu, perkenalkan diri, jelaskan jadwal hari ini dan aturan keselamatan.",b:"Turis: tanyakan jam makan siang, harga snorkeling, dan tempat membeli oleh-oleh.",ph:["Welcome to Bacan Island!","My name is …, and I am your guide today.","First, we will … Then, we will …","Please always wear a life jacket on the boat."]},
+ {title:"Menangani keluhan",sit:"Perahu terlambat satu jam dan turis kesal.",a:"Pemandu: minta maaf, jelaskan alasannya, tawarkan kompensasi.",b:"Turis: sampaikan keluhan dengan tegas, minta solusi.",ph:["I'm very sorry for the delay.","The boat was late because …","We will give you …","Thank you for your patience."]}],
+mkt:[{title:"Menawarkan produk di bazar",sit:"Penjual menawarkan produk rempah lokal kepada pengunjung bazar.",a:"Penjual: sapa, deskripsikan produk (bandingkan dengan produk lain), tawarkan promo.",b:"Pembeli: tanyakan harga, rasa, dan minta diskon.",ph:["Would you like to try our clove tea?","It is healthier than …","Buy two, get one free!","It's the most popular product in our shop."]},
+ {title:"Pembeli minta refund",sit:"Produk yang diterima pembeli rusak.",a:"Penjual: minta maaf, minta foto, tawarkan ganti barang atau refund.",b:"Pembeli: jelaskan masalahnya dan pilih solusi.",ph:["The product I received is broken.","I'm sorry to hear that.","Could you send us a photo?","We can replace it or give you a refund."]}],
+mplb:[{title:"Menerima tamu kantor",sit:"Seorang tamu datang untuk bertemu manajer.",a:"Resepsionis: sapa, tanyakan nama dan keperluan, minta isi buku tamu, beri kartu tamu.",b:"Tamu: perkenalkan diri, sebutkan janji temu.",ph:["Good morning. How can I help you?","May I have your name, please?","Please sign the guest book.","Please wear this visitor badge."]},
+ {title:"Menerima telepon",sit:"Penelepon ingin bicara dengan manajer yang sedang rapat.",a:"Staf: jawab telepon dengan nama perusahaan, catat pesan, ulangi pesannya.",b:"Penelepon: minta bicara dengan manajer, tinggalkan pesan dan nomor telepon.",ph:["Good afternoon, PT Maju Jaya.","I'm sorry, he is in a meeting.","May I take a message?","Could you spell your name, please?"]}],
+dkv:[{title:"Wawancara brief klien",sit:"Pemilik kedai kopi ingin dibuatkan logo.",a:"Desainer: tanyakan usaha, pelanggan, warna yang disukai, dan batas waktu.",b:"Klien: jelaskan usaha dan keinginan desainnya.",ph:["Could you tell me about your shop?","Who are your customers?","Which colors do you like?","When is the deadline?"]},
+ {title:"Presentasi revisi",sit:"Desainer menunjukkan revisi poster kepada klien.",a:"Desainer: jelaskan perubahan dan alasannya, minta masukan.",b:"Klien: beri satu pujian dan satu permintaan perubahan.",ph:["I changed … because …","The title is bigger now, so …","What do you think?","I will send the final version on …"]}]
+};
+const RUBRIC=[["Kelancaran","Berbicara tanpa banyak berhenti"],["Ketepatan bahasa","Kosakata dan grammar tepat"],["Isi tugas","Semua poin peran tersampaikan"],["Sikap & kesopanan","Ramah, kontak mata, nada sopan"]];
+
+/* ---------- STATE ---------- */
+Object.assign(ELEM,{read:"Membaca–Memirsa",say:"Menyimak–Berbicara",arg:"Menyimak–Berbicara",write:"Menulis–Mempresentasikan"});
+const IDX={};
+W.forEach(w=>w.missions.forEach((m,mi)=>m.items.forEach((it,ii)=>{it.id=w.key+"."+mi+"."+ii;IDX[it.id]=it;})));
+const TESTABLE=["lis","mean","dlg","cloze","type","err","dict","arg"];
+const KEY="eq-smk-v3";
+let S={xp:0,done:{},el:{},wrong:{},tests:{},writes:{},name:""};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
+["done","el","wrong","tests","writes"].forEach(k=>{if(!S[k]||typeof S[k]!=="object")S[k]={}});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const app=document.getElementById("app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const norm=s=>String(s).toLowerCase().replace(/[’']/g,"'").replace(/[.,!?;:]+$/g,"").replace(/\s+/g," ").trim();
+const canSpeak=("speechSynthesis" in window)&&("SpeechSynthesisUtterance" in window);
+function speak(t){if(!canSpeak)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="en-US";u.rate=.85;const vs=speechSynthesis.getVoices();const v=vs.find(v=>/^en(-|_)US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u);}catch(e){}}
+function stopSpeak(){if(canSpeak)try{speechSynthesis.cancel()}catch(e){}}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function shuffleNot(a){let s=shuffle(a),n=0;while(s.join("|")===a.join("|")&&n++<12)s=shuffle(a);return s}
+function rank(x){return x>=2500?"Expert":x>=1500?"Senior Staff":x>=700?"Skilled Worker":x>=200?"Junior Staff":"Trainee"}
+const st=k=>S.done[k]||0;
+const unlocked=(w,i)=>i===0||st(w.key+"-"+(i-1))>=2;
+const bossOpen=w=>w.missions.every((m,i)=>st(w.key+"-"+i)>=2);
+const lastTwo=w=>[...w.missions[w.missions.length-2].items,...w.missions[w.missions.length-1].items];
+const reviewIds=w=>Object.keys(S.wrong).filter(id=>id.startsWith(w.key+".")&&IDX[id]);
+function setW(w){document.documentElement.style.setProperty("--w",w?`var(--${w.key})`:"var(--tou)")}
+function topbar(back){return `<div class="bar">${back?`<button class="back" id="bk">← ${esc(back)}</button>`:`<span class="mono">SMK · English for Work</span>`}<span class="chip">⚡ <b id="xpv">${S.xp}</b> XP · ${rank(S.xp)}</span></div>`}
+let timerId=null;function clearTimer(){if(timerId){clearInterval(timerId);timerId=null}}
+const fb=h=>{const e=document.getElementById("fb");if(e)e.innerHTML=h};
+function copyText(text,btn){const done=()=>{btn.textContent="Tersalin ✓"};
+ try{navigator.clipboard.writeText(text).then(done,()=>fallbackCopy(text,btn))}catch(e){fallbackCopy(text,btn)}}
+function fallbackCopy(text,btn){const ta=document.createElement("textarea");ta.value=text;ta.className="ta";ta.readOnly=true;btn.insertAdjacentElement("afterend",ta);ta.focus();ta.select();btn.textContent="Pilih teks di bawah, lalu salin"}
+function testSummary(w){const t=S.tests[w.key]||[];if(!t.length)return"Kerjakan sebelum mulai bermain";const f=t[0],l=t[t.length-1];return t.length===1?`Tes awal: ${f.s}/${f.t}`:`Awal ${f.s}/${f.t} → Terakhir ${l.s}/${l.t}`}
+function pct(o){return o&&o.n?Math.round(o.f/o.n*100):null}
+
+/* ---------- HOME ---------- */
+function home(){
+ setW(null);stopSpeak();clearTimer();
+ app.innerHTML=`${topbar()}
+ <header class="hero"><span class="mono">Game Bahasa Inggris berbasis misi kerja</span>
+  <h1>English Quest <span>SMK</span></h1>
+  <p>Pilih dunia kerja sesuai jurusanmu. Setiap jurusan punya 6 misi bertingkat, dari dasar SMP (Fase D, A1–A2) sampai Fase E–F (B1+) sesuai Capaian Pembelajaran, ditambah Boss Mission.</p></header>
+ <div class="stripe" aria-hidden="true"></div>
+ <section class="worlds">${W.map((w,i)=>{const n=w.missions.filter((m,j)=>st(w.key+"-"+j)>0).length;return `<button class="world" style="--w:var(--${w.key})" data-w="${i}">
+   <div class="top"><div><span class="mono">${esc(w.dept)}</span><h2>${esc(w.title)}</h2></div><span class="ico" aria-hidden="true">${w.ico}</span></div>
+   <div class="body"><p>${n}/${w.missions.length} misi${st(w.key+"-boss")?" · Boss ✓":""}</p><div class="meter">${w.missions.map((m,j)=>`<i class="${st(w.key+"-"+j)?"on":""}"></i>`).join("")}<i class="boss ${st(w.key+"-boss")?"on":""}"></i></div></div></button>`}).join("")}</section>
+ <button class="report-btn" id="rep"><span>📊</span><span><b>Rapor Belajar</b><small>Lihat kemajuanmu per elemen CP, hasil tes, dan kirim ke guru</small></span></button>
+ <section class="legend" aria-label="Level bahasa">${LEVELS.map((l,i)=>`<div><span class="mono">Misi ${i+1}</span><strong>${l.name}</strong><em>${l.grade}</em><span>${l.desc}. ${l.sup}.</span></div>`).join("")}</section>
+ <section class="rules"><h3>Cara bermain supaya kemampuanmu naik</h3><ol>
+  <li><b>Kerjakan Tes Kemampuan dulu</b> di setiap jurusan. Ulangi tesnya setelah menamatkan misi untuk melihat kemajuanmu.</li>
+  <li>Selesaikan misi berurutan. Raih minimal ⭐⭐ untuk membuka misi berikutnya.</li>
+  <li>Soal yang pernah salah masuk ke <b>Latihan Ulang</b>. Kerjakan sampai kosong.</li>
+  <li>Di latihan berbicara, <b>ucapkan kalimat dengan suara keras</b>, jangan hanya dibaca dalam hati.</li>
+  <li>Tugas menulis di misi Professional disalin dan dikirim ke guru untuk dinilai.</li>
+  <li>Mulai Apprentice ada ❤️ nyawa. Boss Mission punya batas waktu per soal.</li></ol></section>
+ <footer class="foot"><button class="small-btn" id="reset">Mulai ulang progres</button><span>English Quest SMK · Kreator: ASW · ady.wansa86@gmail.com</span></footer>`;
+ app.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>world(+b.dataset.w));
+ document.getElementById("rep").onclick=report;
+ const r=document.getElementById("reset");let armed=false;
+ r.onclick=()=>{if(!armed){armed=true;r.textContent="Yakin? Klik sekali lagi untuk menghapus semua progres";return}const nm=S.name;S={xp:0,done:{},el:{},wrong:{},tests:{},writes:{},name:nm};save();home()};
+ window.scrollTo(0,0);
+}
+
+/* ---------- WORLD ---------- */
+function world(wi){
+ const w=W[wi];setW(w);stopSpeak();clearTimer();
+ const stars=k=>{const s=st(k);return s?"★".repeat(s)+"☆".repeat(3-s):""};
+ const nRev=reviewIds(w).length;
+ app.innerHTML=`${topbar("Semua jurusan")}
+ <header class="whead"><span class="big" aria-hidden="true">${w.ico}</span><span class="mono">${esc(w.dept)} · ${esc(w.place)}</span><h1>${esc(w.title)}</h1><p>${esc(w.intro)}</p></header>
+ <section class="tools">
+  <button class="tool" id="t-test"><span class="ti">📝</span><span><b>Tes Kemampuan</b><small>${testSummary(w)}</small></span></button>
+  <button class="tool" id="t-rev" ${nRev?"":"disabled"}><span class="ti">🔁</span><span><b>Latihan Ulang</b><small>${nRev?`${nRev} soal yang pernah salah`:"Belum ada soal yang salah"}</small></span></button>
+  <button class="tool" id="t-glo"><span class="ti">📖</span><span><b>Kamus Kerja</b><small>${GLOSS[w.key].length} istilah dengan audio</small></span></button>
+  <button class="tool" id="t-rp"><span class="ti">🎭</span><span><b>Kartu Role-Play</b><small>Latihan berbicara berpasangan di kelas</small></span></button>
+ </section>
+ <section class="missions">${w.missions.map((m,i)=>{const k=w.key+"-"+i,open=unlocked(w,i),lv=LEVELS[i];
+  return `<button class="mission" data-m="${i}" ${open?"":"disabled"}><div class="lv">${i+1}<small>${lv.name.toUpperCase()}</small></div>
+  <div><h3>${esc(m.title)}</h3><p>${esc(m.en)} · ${open?`${lv.grade} · ${m.items.length} soal${lv.lives?` · ${lv.lives} nyawa`:""}`:"🔒 Raih minimal 2 bintang di misi sebelumnya"}</p></div>
+  <div class="st" aria-label="${st(k)} bintang">${stars(k)}</div></button>`}).join("")}
+  <button class="mission boss" id="boss" ${bossOpen(w)?"":"disabled"}><div class="lv">⚔️<small>BOSS</small></div>
+  <div><h3>Ujian Kerja ${esc(w.title)}</h3><p>${bossOpen(w)?"10 soal acak tersulit · 3 nyawa · waktu terbatas":"🔒 Raih minimal 2 bintang di semua misi"}</p></div>
+  <div class="st">${stars(w.key+"-boss")}</div></button></section>`;
+ document.getElementById("bk").onclick=home;
+ app.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>play(wi,"mission",+b.dataset.m));
+ document.getElementById("boss").onclick=()=>play(wi,"boss");
+ document.getElementById("t-test").onclick=()=>testIntro(wi);
+ document.getElementById("t-rev").onclick=()=>play(wi,"review");
+ document.getElementById("t-glo").onclick=()=>glossary(wi);
+ document.getElementById("t-rp").onclick=()=>roleplay(wi);
+ window.scrollTo(0,0);
+}
+
+/* ---------- GLOSSARY & ROLE-PLAY ---------- */
+function glossary(wi){
+ const w=W[wi];setW(w);
+ app.innerHTML=`${topbar(w.title)}
+ <section class="panel"><span class="mono">${esc(w.dept)}</span><h1 class="ph">Kamus Kerja</h1><p class="muted">Ketuk 🔊 untuk mendengar. Ucapkan setiap istilah dengan suara keras, lalu buat satu kalimat sendiri.</p>
+ <div class="gl">${GLOSS[w.key].map(([en,id])=>`<div class="gl-r">${canSpeak?`<button class="speak sm" data-say="${esc(en)}" aria-label="Dengarkan ${esc(en)}">🔊</button>`:""}<b>${esc(en)}</b><span>${esc(id)}</span></div>`).join("")}</div></section>`;
+ document.getElementById("bk").onclick=()=>world(wi);
+ app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>speak(b.dataset.say));
+ window.scrollTo(0,0);
+}
+function roleplay(wi){
+ const w=W[wi];setW(w);
+ app.innerHTML=`${topbar(w.title)}
+ <section class="panel"><span class="mono">${esc(w.dept)} · Menyimak–Berbicara</span><h1 class="ph">Kartu Role-Play</h1>
+ <p class="muted">Main berpasangan di kelas. Siswa A dan B membaca perannya masing-masing selama 2 menit, lalu bercakap 3–4 menit tanpa membaca teks. Setelah itu bertukar peran. Guru atau teman menilai dengan rubrik di bawah.</p></section>
+ ${ROLE[w.key].map((c,i)=>`<article class="rp"><div class="rp-h"><span class="mono">Kartu ${i+1}</span><h2>${esc(c.title)}</h2><p>${esc(c.sit)}</p></div>
+  <div class="rp-roles"><div><span class="mono">Peran A</span><p>${esc(c.a)}</p></div><div><span class="mono">Peran B</span><p>${esc(c.b)}</p></div></div>
+  <div class="rp-ph"><span class="mono">Ungkapan yang berguna</span>${c.ph.map(p=>`<div class="gl-r">${canSpeak?`<button class="speak sm" data-say="${esc(p)}" aria-label="Dengarkan">🔊</button>`:""}<b>${esc(p)}</b></div>`).join("")}</div></article>`).join("")}
+ <section class="panel"><h3 class="h3">Rubrik penilaian berbicara (skor 1–4)</h3><div class="tblw"><table><tr><th>Aspek</th><th>Yang dinilai</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+ ${RUBRIC.map(([a,d])=>`<tr><td><b>${a}</b></td><td>${d}</td><td>Belum</td><td>Cukup</td><td>Baik</td><td>Sangat baik</td></tr>`).join("")}</table></div>
+ <p class="muted" style="margin-top:8px">Nilai = jumlah skor × 6,25 (maksimal 100).</p></section>`;
+ document.getElementById("bk").onclick=()=>world(wi);
+ app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>speak(b.dataset.say));
+ window.scrollTo(0,0);
+}
+
+/* ---------- REPORT ---------- */
+function report(){
+ setW(null);stopSpeak();clearTimer();
+ const elRows=ELEMS.map(e=>{const p=pct(S.el[e]),o=S.el[e]||{n:0,f:0};return `<div class="elrow"><span>${e}</span><span class="elbar"><i style="width:${p||0}%"></i></span><b>${p===null?"–":p+"%"}</b><small>${o.f}/${o.n} soal</small></div>`}).join("");
+ const weak=ELEMS.filter(e=>S.el[e]&&S.el[e].n>=4).sort((a,b)=>pct(S.el[a])-pct(S.el[b]))[0];
+ const rows=W.map(w=>{const n=w.missions.filter((m,j)=>st(w.key+"-"+j)>0).length,stars=w.missions.reduce((s,m,j)=>s+st(w.key+"-"+j),0);
+  return `<tr><td><b>${esc(w.title)}</b><br><small>${esc(w.dept)}</small></td><td>${n}/${w.missions.length}</td><td>${stars}/18</td><td>${st(w.key+"-boss")?"Lulus":"–"}</td><td>${(S.tests[w.key]||[]).length?testSummary(w):"–"}</td><td>${reviewIds(w).length}</td></tr>`}).join("");
+ app.innerHTML=`${topbar("Kembali")}
+ <section class="panel"><span class="mono">Rapor belajar</span><h1 class="ph">Kemajuanmu</h1>
+ <label class="lbl" for="nm">Nama siswa & kelas</label><input class="inp" id="nm" type="text" placeholder="Contoh: Dewi, XI Akuntansi 1" value="${esc(S.name||"")}">
+ <div class="kpis"><div><b>${S.xp}</b><span>Total XP</span></div><div><b>${rank(S.xp)}</b><span>Peringkat</span></div><div><b>${Object.keys(S.writes).length}</b><span>Tulisan selesai</span></div></div></section>
+ <section class="panel"><h3 class="h3">Ketepatan per elemen Capaian Pembelajaran</h3><p class="muted">Persentase soal yang dijawab benar pada percobaan pertama.</p>${elRows}
+ ${weak?`<p class="tipbox">💡 Elemen yang paling perlu dilatih: <b>${weak}</b>. ${weak.startsWith("Menyimak")?"Perbanyak latihan dikte, listening, dan kartu role-play.":weak.startsWith("Membaca")?"Kerjakan ulang soal bacaan teks kerja dan perhatikan pertanyaan tersirat.":"Perbanyak menyusun kalimat, mengetik jawaban, dan tugas menulis."}</p>`:""}</section>
+ <section class="panel"><h3 class="h3">Per jurusan</h3><div class="tblw"><table><tr><th>Jurusan</th><th>Misi</th><th>Bintang</th><th>Boss</th><th>Tes kemampuan</th><th>Perlu diulang</th></tr>${rows}</table></div></section>
+ <section class="panel"><h3 class="h3">Kirim ke guru</h3><p class="muted">Salin ringkasan rapor dan semua tulisanmu, lalu kirim lewat WhatsApp atau email ke guru.</p>
+ <div class="row"><button class="btn" id="cp">Salin rapor & tulisan</button></div></section>
+ <section class="panel"><h3 class="h3">Panduan untuk guru</h3><ol class="guide">
+  <li><b>Minggu 1:</b> siswa mengerjakan Tes Kemampuan di jurusannya (tes awal). Catat skornya.</li>
+  <li><b>Minggu 2–6:</b> 1–2 misi per minggu (±20 menit). Mulai dari Rookie bila skor tes awal di bawah 6/12.</li>
+  <li><b>Setiap pekan:</b> satu sesi Kartu Role-Play berpasangan (10 menit), dinilai dengan rubrik.</li>
+  <li><b>Misi Professional:</b> nilai tulisan siswa (email/laporan) yang mereka kirimkan.</li>
+  <li><b>Minggu terakhir:</b> tes akhir. Bandingkan dengan tes awal dan lihat elemen CP yang masih lemah di rapor.</li></ol>
+  <p class="muted">Progres tersimpan di perangkat masing-masing siswa. Gunakan perangkat yang sama setiap kali bermain.</p></section>`;
+ document.getElementById("bk").onclick=home;
+ const nm=document.getElementById("nm");nm.oninput=()=>{S.name=nm.value;save()};
+ document.getElementById("cp").onclick=e=>copyText(reportText(),e.currentTarget);
+ window.scrollTo(0,0);
+}
+function reportText(){
+ let t=`RAPOR ENGLISH QUEST SMK\nNama: ${S.name||"(belum diisi)"}\nTanggal: ${new Date().toLocaleDateString("id-ID")}\nTotal XP: ${S.xp} (${rank(S.xp)})\n\nKetepatan per elemen CP:\n`;
+ ELEMS.forEach(e=>{const o=S.el[e];t+=`- ${e}: ${o?`${pct(o)}% (${o.f}/${o.n})`:"belum ada data"}\n`});
+ t+="\nPer jurusan:\n";
+ W.forEach(w=>{const n=w.missions.filter((m,j)=>st(w.key+"-"+j)>0).length;t+=`- ${w.title} (${w.dept}): misi ${n}/${w.missions.length}, Boss ${st(w.key+"-boss")?"lulus":"belum"}, tes: ${(S.tests[w.key]||[]).length?testSummary(w):"belum"}\n`});
+ const ws=Object.entries(S.writes);
+ if(ws.length){t+="\nTULISAN:\n";ws.forEach(([id,v])=>{const w=W.find(x=>id.startsWith(x.key+"."));t+=`\n[${w?w.title:id}, ${v.d}]\n${v.text}\n`})}
+ return t;
+}
+
+/* ---------- TEST ---------- */
+function testIntro(wi){
+ const w=W[wi];setW(w);const t=S.tests[w.key]||[];
+ app.innerHTML=`${topbar(w.title)}
+ <section class="result"><span class="mono">${esc(w.title)} · Tes Kemampuan</span><h1>${t.length?"Tes Akhir":"Tes Awal"}</h1>
+ <p style="margin:0;max-width:48ch">12 soal acak dari semua level (dasar sampai Fase E–F). Tidak ada petunjuk dan jawaban tidak ditunjukkan sampai tes selesai. Kerjakan dengan jujur supaya hasilnya menunjukkan kemampuan aslimu.</p>
+ ${t.length?`<p class="muted" style="margin:0">Riwayat: ${t.map((x,i)=>`${i===0?"Awal":"Tes "+(i+1)} ${x.s}/${x.t}`).join(" · ")}</p>`:""}
+ <div class="row" style="justify-content:center"><button class="btn" id="go">Mulai tes</button><button class="btn ghost" id="mp">Kembali</button></div></section>`;
+ document.getElementById("bk").onclick=()=>world(wi);document.getElementById("mp").onclick=()=>world(wi);
+ document.getElementById("go").onclick=()=>play(wi,"test");
+}
+function buildTest(w){let out=[];w.missions.forEach(m=>{out.push(...shuffle(m.items.filter(x=>TESTABLE.includes(x.t))).slice(0,2))});return shuffle(out)}
+
+/* ---------- PLAY ---------- */
+let G=null;const cur=()=>G.items[G.i];
+function play(wi,mode,mi){
+ const w=W[wi];let lv,items;
+ if(mode==="mission"){lv=LEVELS[mi];const all=w.missions[mi].items;items=[...shuffle(all.filter(x=>x.t!=="write")),...all.filter(x=>x.t==="write")];}
+ else if(mode==="boss"){lv=BOSS;items=shuffle(lastTwo(w).filter(x=>x.t!=="say"&&x.t!=="write")).slice(0,BOSS.count);}
+ else if(mode==="review"){lv={name:"Latihan Ulang",help:"tap",lives:0};items=shuffle(reviewIds(w).map(id=>IDX[id])).slice(0,10);if(!items.length)return world(wi);}
+ else{lv={name:"Tes Kemampuan",help:"none",lives:0};items=buildTest(w);}
+ G={wi,mode,mi,lv,items,i:0,err:0,errNow:0,itemErr:0,xp:0,lives:lv.lives||0,maxLives:lv.lives||0,done:false,el:{},correct:0};
+ step();
+}
+function hearts(){if(!G.maxLives)return "";let h="";for(let i=0;i<G.maxLives;i++)h+=i<G.lives?"♥":`<span class="lost">♥</span>`;return `<span class="hearts" aria-label="${G.lives} nyawa">${h}</span>`}
+function modeTitle(w){return G.mode==="boss"?`Ujian Kerja ${w.title}`:G.mode==="review"?"Latihan Ulang":G.mode==="test"?"Tes Kemampuan":w.missions[G.mi].title}
+function step(){
+ clearTimer();stopSpeak();
+ const w=W[G.wi],it=cur(),lv=G.lv;G.errNow=0;G.itemErr=0;G.done=false;G.rq=0;
+ const brief=G.mode==="boss"?"Semua keterampilan diuji. Jawab sebelum waktu habis.":G.mode==="review"?"Soal-soal yang pernah kamu jawab salah. Jawab benar pada percobaan pertama untuk menghapusnya dari daftar.":G.mode==="test"?"Tanpa petunjuk. Satu kali kesempatan menjawab untuk setiap soal.":w.missions[G.mi].brief;
+ const code=`${w.key.toUpperCase()}-${G.mode==="mission"?G.mi+1:G.mode[0].toUpperCase()}${String(G.i+1).padStart(2,"0")}`;
+ const trBlock=tr=>!tr?"":lv.help==="full"?`<div class="tr">${esc(tr)}</div>`:lv.help==="tap"?`<div class="tr" id="trx" hidden>${esc(tr)}</div>`:"";
+ const trBtn=tr=>tr&&lv.help==="tap"?`<button class="trbtn" id="trb">Lihat terjemahan</button>`:"";
+ const sp=t=>canSpeak?`<button class="speak" data-say="${esc(t)}" aria-label="Dengarkan">🔊</button>`:"";
+ const blank=s=>esc(s).replace("___",'<span class="blank" id="blank">?</span>');
+ const optList=arr=>`<div class="opts">${arr.map((o,j)=>`<button class="opt" data-o="${j}">${esc(o)}</button>`).join("")}</div>`;
+ const listenBox=(say,textHelp)=>`<div class="listen">${canSpeak?`<button class="speak" data-say="${esc(say)}" aria-label="Putar audio">🔊</button><span class="mono">Ketuk untuk mendengar (boleh diulang)</span>`:""}
+  <div class="hidden-text" id="ht" ${canSpeak?"hidden":""}>${esc(say)}</div>${canSpeak&&textHelp?`<button class="trbtn" id="showtxt">Tampilkan teks (bantuan)</button>`:""}</div>`;
+ let body="";G.opts=null;
+ switch(it.t){
+ case "pick":G.opts=shuffle(it.o);
+  body=`<p class="task">Dengarkan instruksi, lalu pilih gambar yang tepat.</p>
+  <div class="say">${sp(it.say)}<div><div class="who">Supervisor</div><div class="en">${esc(it.say)}</div>${trBlock(it.tr)}</div></div>${trBtn(it.tr)}
+  <div class="opts pics">${G.opts.map((o,j)=>`<button class="opt pic" data-o="${j}"><span class="em" aria-hidden="true">${o[0]}</span><span class="lb"></span></button>`).join("")}</div>`;break;
+ case "lis":G.opts=shuffle(it.o);
+  body=`<p class="task">Dengarkan baik-baik, lalu pilih artinya.${canSpeak?" Kalimat tidak ditampilkan.":""}</p>${listenBox(it.say,lv.help==="full")}${optList(G.opts)}`;break;
+ case "dict":
+  body=`<p class="task">${esc(it.ctx)}</p>${listenBox(it.say,false)}
+  <form class="row" id="tf" autocomplete="off"><input class="inp" id="ti" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Tulis yang kamu dengar…" aria-label="Jawaban"><button class="btn" type="submit">Periksa</button></form>`;break;
+ case "mean":G.opts=shuffle(it.o);
+  body=`<p class="task">Apa arti kalimat ini?</p><div class="say">${sp(it.say)}<div><div class="who">Kalimat kerja</div><div class="en">${esc(it.say)}</div></div></div>${optList(G.opts)}`;break;
+ case "dlg":case "arg":G.opts=shuffle(it.o);
+  body=`<p class="task">${it.t==="arg"?"Pertahankan pendapatmu: pilih argumen yang paling kuat dan sopan.":"Pilih jawaban yang paling sopan dan membantu."}</p>
+  <div class="say">${sp(it.say)}<div><div class="who">${esc(it.who)}</div><div class="en">“${esc(it.say)}”</div>${trBlock(it.tr)}</div></div>${trBtn(it.tr)}${optList(G.opts)}`;break;
+ case "cloze":G.opts=shuffle(it.o);
+  body=`<p class="task">Pilih kata yang tepat untuk melengkapi kalimat.</p>
+  <div class="say"><div><div class="who">${esc(it.ctx)}</div><div class="en">${blank(it.s)}</div>${trBlock(it.tr)}</div></div>${trBtn(it.tr)}${optList(G.opts)}`;break;
+ case "type":
+  body=`<p class="task">Ketik jawaban yang tepat untuk mengisi bagian kosong.</p>
+  <div class="say"><div><div class="who">${esc(it.ctx)}</div><div class="en">${blank(it.s)}</div>${trBlock(it.tr)}</div></div>${trBtn(it.tr)}
+  <form class="row" id="tf" autocomplete="off"><input class="inp" id="ti" type="text" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="Ketik jawabanmu…" aria-label="Jawaban"><button class="btn" type="submit">Periksa</button></form>`;break;
+ case "err":G.words=it.s.split(" ");
+  body=`<p class="task">Ada satu kata yang salah secara tata bahasa. Ketuk kata itu.</p>
+  <div class="say"><div><div class="who">Periksa kalimat</div><div class="words">${G.words.map((x,j)=>`<button class="tile" data-x="${j}">${esc(x)}</button>`).join("")}</div></div></div>`;break;
+ case "arr":G.arr={words:shuffleNot(it.w.split(" ")),picked:[],target:it.w};
+  body=`<p class="task">Susun kata menjadi kalimat Bahasa Inggris yang benar.</p>
+  <div class="say"><div><div class="who">Artinya</div><div class="en" style="font-size:20px">${esc(it.tr)}</div></div></div>
+  <div class="slot" id="slot" aria-label="Kalimatmu"></div><div class="bank">${G.arr.words.map((x,j)=>`<button class="tile" data-t="${j}">${esc(x)}</button>`).join("")}</div>
+  <div class="row"><button class="btn" id="chk" disabled>Periksa</button><button class="btn ghost" id="clr">Ulangi</button></div>`;break;
+ case "ord":G.arr={words:shuffleNot(it.steps),picked:[],target:it.steps.join("|")};
+  body=`<p class="task">Susun langkah-langkah SOP dengan urutan yang benar. Ketuk langkah satu per satu.</p>
+  <div class="say"><div><div class="who">Prosedur</div><div class="en" style="font-size:20px">${esc(it.ctx)}</div></div></div>
+  <div class="slot col" id="slot" aria-label="Urutanmu"></div><div class="bank col">${G.arr.words.map((x,j)=>`<button class="tile step" data-t="${j}">${esc(x)}</button>`).join("")}</div>
+  <div class="row"><button class="btn" id="chk" disabled>Periksa</button><button class="btn ghost" id="clr">Ulangi</button></div>`;break;
+ case "read":
+  body=`<p class="task">Baca teks kerja ini dengan teliti, lalu jawab pertanyaannya. Sebagian jawaban tidak tertulis langsung (tersirat).</p>${renderDoc(it)}<div id="rq"></div>`;break;
+ case "say":G.said=0;
+  body=`<p class="task">Latihan berbicara: dengarkan contoh, lalu ucapkan kalimat ini dengan suara keras.</p>
+  <div class="say">${sp(it.say)}<div><div class="who">Ucapkan kalimat ini</div><div class="en">${esc(it.say)}</div>${trBlock(it.tr)}</div></div>${trBtn(it.tr)}
+  <p class="tipbox">💡 ${esc(it.tip)}</p>
+  <div class="row"><button class="btn ghost" id="said">🗣️ Saya sudah mengucapkannya (0/3)</button></div><div id="rate"></div>`;break;
+ case "write":
+  body=`<p class="task">Tugas menulis. Hasilnya disalin dan dikirim ke guru untuk dinilai.</p>
+  <div class="say"><div><div class="who">Tugas</div><div class="en" style="font-size:18px;font-weight:400;line-height:1.5">${esc(it.task)}</div></div></div>
+  <div class="frame"><span class="mono">Kerangka kalimat (boleh diikuti)</span><pre class="pre">${esc(it.frame)}</pre></div>
+  <details class="model" id="md"><summary>Lihat contoh teks (bantuan, XP berkurang)</summary><pre class="pre">${esc(it.model)}</pre></details>
+  <label class="lbl" for="wa">Tulisanmu</label><textarea class="ta" id="wa" rows="8" placeholder="Tulis teksmu dalam bahasa Inggris…"></textarea>
+  <ul class="checks" id="ck"></ul>
+  <div class="row"><button class="btn" id="ws" disabled>Kirim tulisan</button><span class="mono" id="wc">0 kata</span></div>`;break;
+ }
+ app.innerHTML=`${topbar(w.title)}
+ <article class="ticket"><div class="tk-h"><span class="mono">Work order · ${code} · ${esc(lv.name)}</span>
+  <div class="stat">${hearts()}<span>${G.i+1}/${G.items.length}</span></div></div>
+  <div class="tk-h tk-el"><span class="mono">Elemen CP: ${ELEM[it.t]}</span></div>
+  ${G.mode==="boss"?`<div class="timer" id="tm"><i style="width:100%"></i></div>`:""}
+ <div class="tk-b">${G.i===0?`<div><h2 class="mt">${esc(modeTitle(w))}</h2><p class="task" style="margin-top:6px">${esc(brief)}</p></div>`:""}
+ ${body}<div id="fb"></div></div></article>`;
+ document.getElementById("bk").onclick=()=>world(G.wi);
+ app.querySelectorAll("[data-say]").forEach(b=>b.onclick=()=>speak(b.dataset.say));
+ const tb=document.getElementById("trb");if(tb)tb.onclick=()=>{document.getElementById("trx").hidden=false;tb.remove()};
+ const stx=document.getElementById("showtxt");if(stx)stx.onclick=()=>{document.getElementById("ht").hidden=false;stx.remove()};
+ ({arr:bindArr,ord:bindArr,type:bindType,dict:bindType,err:bindErr,read:readQ,say:bindSay,write:bindWrite}[it.t]||bindChoose)(it);
+ if(["pick","lis","dict"].includes(it.t)&&G.i>0)speak(it.say);
+ if(G.mode==="boss")startTimer(it.t==="read"?100:45);
+ window.scrollTo({top:0});
+}
+function renderDoc(it){
+ let out="",tbl=[];const flush=()=>{if(tbl.length){out+=`<div class="tblw"><table>${tbl.map((r,i)=>`<tr>${r.split("|").map(c=>i?`<td>${esc(c.trim())}</td>`:`<th>${esc(c.trim())}</th>`).join("")}</tr>`).join("")}</table></div>`;tbl=[]}};
+ it.text.split("\n").forEach(l=>{if(l.includes("|"))tbl.push(l);else{flush();out+=l.trim()?`<p>${esc(l)}</p>`:`<div class="sp"></div>`}});flush();
+ return `<div class="doc"><div class="doc-h"><span class="mono">${esc(it.kind)}</span><strong>${esc(it.title)}</strong></div><div class="doc-b">${out}</div></div>`;
+}
+function startTimer(sec){
+ let left=sec;const bar=document.getElementById("tm");if(!bar)return;const i=bar.querySelector("i");i.style.width="100%";bar.classList.remove("low");
+ timerId=setInterval(()=>{if(G.done){clearTimer();return}left--;i.style.width=(left/sec*100)+"%";bar.classList.toggle("low",left<=10);
+  if(left<=0){clearTimer();miss("Waktu habis! Satu nyawa hilang. Coba jawab lagi.",true);if(!G.done&&G.lives>0)startTimer(sec)}},1000);
+}
+function disableAll(){app.querySelectorAll(".tk-b button.opt,.tk-b .tile,.tk-b .inp,.tk-b form button,#chk,#clr").forEach(x=>{x.disabled=true;if(x.tagName==="INPUT")x.readOnly=true})}
+function testAnswer(ok){G.done=true;if(ok)G.correct++;disableAll();showNext("",`<div class="fb"><strong>Jawaban tercatat.</strong><span>Hasilnya ditampilkan setelah tes selesai.</span></div>`)}
+
+/* ---------- ANSWER HANDLERS ---------- */
+function bindChoose(it){
+ app.querySelectorAll("[data-o]").forEach(b=>b.onclick=()=>{if(G.done)return;
+  const opt=G.opts[+b.dataset.o],ok=it.t==="pick"?opt[1]===it.o[0][1]:opt===it.o[0];
+  if(G.mode==="test"){b.classList.add("sel");return testAnswer(ok)}
+  if(ok){b.classList.add("ok");app.querySelectorAll("[data-o]").forEach(x=>x.disabled=true);
+   if(it.t==="pick")app.querySelectorAll(".opt.pic").forEach((x,k)=>x.querySelector(".lb").textContent=G.opts[k][1]);
+   if(it.t==="cloze")document.getElementById("blank").textContent=it.o[0];
+   if(it.t==="lis"){const h=document.getElementById("ht");if(h)h.hidden=false;const s=document.getElementById("showtxt");if(s)s.remove()}
+   if(it.t==="dlg"||it.t==="arg")speak(it.o[0]);else if(it.t==="cloze")speak(it.s.replace("___",it.o[0]).replace(/^Direct:.*?→\s*/,""));
+   correct(it.hint);
+  }else{b.classList.add("no");b.disabled=true;miss(it.hint)}});
+}
+function bindType(it){
+ const f=document.getElementById("tf"),inp=document.getElementById("ti"),isD=it.t==="dict";
+ const sq=s=>isD?norm(s).replace(/[.,\s-]/g,""):norm(s);
+ f.onsubmit=e=>{e.preventDefault();if(G.done)return;const v=sq(inp.value);if(!v)return;const ok=it.ans.some(a=>sq(a)===v);
+  if(G.mode==="test")return testAnswer(ok);
+  if(ok){inp.classList.remove("no");inp.classList.add("ok");inp.readOnly=true;f.querySelector("button").disabled=true;
+   if(isD){document.getElementById("ht").hidden=false;correct(`Kamu mendengar: “${it.say}”. ${it.hint}`)}
+   else{document.getElementById("blank").textContent=it.ans[0];speak(it.s.replace("___",it.ans[0]).replace(/\s*\(.*?\)/,"").replace(/^Direct:.*?→\s*/,""));correct(it.hint)}}
+  else{inp.classList.add("no");inp.classList.remove("shake");void inp.offsetWidth;inp.classList.add("shake");const a=it.ans[0];
+   if(isD)miss(G.errNow>=1?`${it.hint} Jawaban: ${a}.`:"Dengarkan sekali lagi dengan teliti.");
+   else miss(it.hint+(G.errNow>=1?` Petunjuk: diawali “${a.slice(0,Math.max(1,Math.ceil(a.length/3)))}…”, ${a.length} huruf.`:""));}};
+}
+function bindErr(it){
+ app.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{if(G.done)return;const ok=G.words[+b.dataset.x].replace(/[.,!?]/g,"")===it.bad;
+  if(G.mode==="test"){b.classList.add("sel");return testAnswer(ok)}
+  if(ok){b.classList.add("ok");b.textContent=b.textContent.replace(it.bad,it.fix);app.querySelectorAll("[data-x]").forEach(x=>x.disabled=true);
+   const fixed=it.s.replace(it.bad,it.fix);speak(fixed);correct(`Benar: “${fixed}” ${it.hint}`);}
+  else{b.classList.add("no");b.disabled=true;miss(it.hint)}});
+}
+function bindArr(it){
+ const slot=document.getElementById("slot"),chk=document.getElementById("chk"),isOrd=it.t==="ord";
+ const draw=()=>{slot.className="slot"+(isOrd?" col":"");
+  slot.innerHTML=G.arr.picked.map((j,p)=>`<button class="tile${isOrd?" step":""}" data-p="${p}">${isOrd?`<b>${p+1}.</b>`:""}${esc(G.arr.words[j])}</button>`).join("");
+  app.querySelectorAll("[data-t]").forEach(b=>b.classList.toggle("used",G.arr.picked.includes(+b.dataset.t)));
+  chk.disabled=G.arr.picked.length!==G.arr.words.length;
+  slot.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{if(G.done)return;G.arr.picked.splice(+b.dataset.p,1);draw()})};
+ app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{if(G.done)return;const j=+b.dataset.t;if(!G.arr.picked.includes(j)){G.arr.picked.push(j);draw()}});
+ document.getElementById("clr").onclick=()=>{if(G.done)return;G.arr.picked=[];draw();fb("")};
+ chk.onclick=()=>{const s=G.arr.picked.map(j=>G.arr.words[j]).join(isOrd?"|":" ");
+  if(s===G.arr.target){slot.className="slot ok"+(isOrd?" col":"");app.querySelectorAll(".tile").forEach(b=>b.disabled=true);chk.disabled=true;document.getElementById("clr").disabled=true;
+   if(!isOrd)speak(it.w);correct(isOrd?"Urutan prosedur sudah benar.":`“${it.w}”`);}
+  else{slot.className="slot no"+(isOrd?" col":"");let extra="";
+   if(G.errNow>=1){if(isOrd){const k=G.arr.picked.findIndex((j,p)=>G.arr.words[j]!==it.steps[p]);extra=` Petunjuk: langkah ke-${k+1} belum tepat.`}else extra=` Petunjuk: kalimat dimulai dengan “${it.w.split(" ").slice(0,2).join(" ")} …”`}
+   miss(it.hint+extra);}};
+ draw();
+}
+function readQ(it){
+ const k=G.rq,qq=it.qs[k];G.errNow=0;G.done=false;G.qopts=shuffle(qq.o);
+ document.getElementById("rq").innerHTML=`<div class="rq"><span class="mono">Pertanyaan ${k+1}/${it.qs.length} · ${qq.imp?"Informasi tersirat":"Informasi tersurat"}</span><p class="qtext">${esc(qq.q)}</p>
+ <div class="opts">${G.qopts.map((o,j)=>`<button class="opt" data-q="${j}">${esc(o)}</button>`).join("")}</div></div>`;
+ document.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{if(G.done)return;const ok=G.qopts[+b.dataset.q]===qq.o[0];
+  if(ok){b.classList.add("ok");document.querySelectorAll("[data-q]").forEach(x=>x.disabled=true);award(G.errNow===0,ELEM.read);
+   if(k<it.qs.length-1){fb(`<div class="fb ok pop"><strong>Benar!</strong><span>${esc(qq.hint)}</span></div><div class="row" style="margin-top:12px"><button class="btn" id="nq">Pertanyaan berikutnya →</button></div>`);
+    const nq=document.getElementById("nq");nq.focus({preventScroll:true});nq.onclick=()=>{fb("");G.rq++;readQ(it)}}
+   else showNext(qq.hint);}
+  else{b.classList.add("no");b.disabled=true;miss(qq.hint)}});
+}
+function bindSay(it){
+ const btn=document.getElementById("said");
+ btn.onclick=()=>{G.said++;btn.textContent=`🗣️ Saya sudah mengucapkannya (${G.said}/3)`;
+  if(G.said>=3){btn.disabled=true;document.getElementById("rate").innerHTML=`<p class="task" style="margin:8px 0">Nilai dirimu dengan jujur. Bagaimana pengucapanmu?</p>
+   <div class="row"><button class="btn" data-r="3">Lancar & jelas</button><button class="btn ghost" data-r="2">Cukup, masih ragu</button><button class="btn ghost" data-r="1">Perlu latihan lagi</button></div>`;
+   app.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const r=+b.dataset.r;app.querySelectorAll("[data-r]").forEach(x=>x.disabled=true);
+    award(r===3,ELEM.say,r===3?10:r===2?7:4);if(r===1){S.wrong[it.id]=1;G.itemErr=1;save()}
+    showNext(r===1?"Kalimat ini masuk Latihan Ulang. Dengarkan contohnya beberapa kali lagi.":"Bagus! Terus berlatih mengucapkan kalimat kerja dengan suara keras.")})}};
+}
+function bindWrite(it){
+ const ta=document.getElementById("wa"),ck=document.getElementById("ck"),ws=document.getElementById("ws"),wc=document.getElementById("wc"),md=document.getElementById("md");
+ G.usedModel=false;md.addEventListener("toggle",()=>{if(md.open)G.usedModel=true});
+ const prev=S.writes[it.id];if(prev)ta.value=prev.text;
+ const upd=()=>{const t=ta.value,words=(t.trim().match(/[A-Za-z0-9'’.,-]+/g)||[]).length;
+  const res=it.checks.map(([lab,re])=>[lab,new RegExp(re,"i").test(t)]);res.push([`Minimal ${it.min} kata`,words>=it.min]);
+  ck.innerHTML=res.map(([l,ok])=>`<li class="${ok?"on":""}">${ok?"✓":"○"} ${esc(l)}</li>`).join("");
+  wc.textContent=`${words} kata`;ws.disabled=!res.every(r=>r[1]);};
+ ta.oninput=upd;upd();
+ ws.onclick=()=>{if(G.done)return;const text=ta.value.trim();S.writes[it.id]={text,d:new Date().toLocaleDateString("id-ID")};ta.readOnly=true;ws.disabled=true;
+  award(!G.usedModel,ELEM.write,G.usedModel?12:20);
+  showNext("",`<div class="fb ok pop"><strong>Tulisan terkirim ke rapor! +${G.usedModel?12:20} XP</strong><span>Bandingkan tulisanmu dengan contoh teks di atas, lalu salin dan kirim ke guru untuk dinilai.</span><div class="row" style="margin-top:8px"><button class="btn ghost" id="cpw">Salin tulisanku</button></div></div>`);
+  md.open=true;document.getElementById("cpw").onclick=e=>copyText(`${S.name?S.name+"\n":""}${W[G.wi].title}: ${it.task}\n\n${text}`,e.currentTarget);};
+}
+
+/* ---------- SCORING ---------- */
+function award(first,e,pts){
+ if(G.mode==="test")return;
+ pts=pts||((first?10:5)*(G.mode==="boss"?1.5:1)|0);G.xp+=pts;S.xp+=pts;
+ [G.el,S.el].forEach(o=>{o[e]=o[e]||{n:0,f:0};o[e].n++;if(first)o[e].f++});
+ save();const xv=document.getElementById("xpv");if(xv)xv.textContent=S.xp;
+}
+function correct(note){award(G.errNow===0,ELEM[cur().t]);showNext(note)}
+function showNext(note,html){
+ G.done=true;clearTimer();
+ if(G.mode==="review"&&G.itemErr===0)delete S.wrong[cur().id];save();
+ const last=G.i===G.items.length-1;
+ fb(`${html||`<div class="fb ok pop"><strong>Benar!</strong><span>${esc(note)}</span></div>`}<div class="row" style="margin-top:12px"><button class="btn" id="nx">${last?"Selesai":"Lanjut →"}</button></div>`);
+ const nx=document.getElementById("nx");nx.focus({preventScroll:true});nx.onclick=()=>{if(last)finish();else{G.i++;step()}};
+}
+function updateStat(){const s=app.querySelector(".tk-h .stat");if(s)s.innerHTML=`${hearts()}<span>${G.i+1}/${G.items.length}</span>`}
+function miss(h,timeout){
+ G.err++;G.errNow++;G.itemErr++;S.wrong[cur().id]=1;save();
+ if(G.maxLives){G.lives--;updateStat()}
+ if(G.maxLives&&G.lives<=0){G.done=true;clearTimer();setTimeout(fail,1100);fb(`<div class="fb no"><strong>Nyawa habis.</strong><span>${esc(h)}</span></div>`);return}
+ fb(`<div class="fb no shake"><strong>${timeout?"Waktu habis.":"Belum tepat, coba lagi."}${G.maxLives?` (sisa ${G.lives} nyawa)`:""}</strong><span>${esc(h)}</span></div>`);
+}
+function starsFor(err){return err<=1?3:err<=3?2:1}
+function elemReport(){
+ const rows=ELEMS.filter(e=>G.el[e]).map(e=>{const r=G.el[e],p=Math.round(r.f/r.n*100);
+  return `<div class="elrow"><span>${e}</span><span class="elbar"><i style="width:${p}%"></i></span><b>${r.f}/${r.n}</b></div>`}).join("");
+ return rows?`<div class="elbox"><span class="mono">Benar di percobaan pertama, per elemen CP</span>${rows}</div>`:"";
+}
+function finish(){
+ clearTimer();const w=W[G.wi];
+ if(G.mode==="test"){
+  const list=S.tests[w.key]=S.tests[w.key]||[];list.push({s:G.correct,t:G.items.length,d:new Date().toLocaleDateString("id-ID")});save();
+  const first=list[0],diff=G.correct-first.s,p=Math.round(G.correct/G.items.length*100);
+  const advice=p<50?"Mulailah dari misi Rookie dan Starter untuk menguatkan dasar.":p<75?"Fokus pada misi Apprentice dan Technician.":"Kamu siap untuk misi Professional dan Boss Mission.";
+  app.innerHTML=`${topbar(w.title)}<section class="result pop"><span class="mono">${esc(w.title)} · Tes Kemampuan ${list.length===1?"Awal":"ke-"+list.length}</span>
+  <h1>${G.correct}/${G.items.length}</h1><p style="margin:0;font-size:20px;font-weight:700">Skor ${p}</p>
+  ${list.length>1?`<p class="badge">${diff>0?`📈 Naik ${diff} poin dari tes awal`:diff===0?"Sama dengan tes awal":`Turun ${-diff} poin dari tes awal`}</p>`:""}
+  <p class="muted" style="margin:0;max-width:46ch">${advice}</p>
+  <div class="row" style="justify-content:center"><button class="btn" id="mp">Ke peta misi</button></div></section>`;
+  document.getElementById("bk").onclick=()=>world(G.wi);document.getElementById("mp").onclick=()=>world(G.wi);window.scrollTo(0,0);return;
+ }
+ if(G.mode==="review"){
+  const left=reviewIds(w).length;
+  app.innerHTML=`${topbar(w.title)}<section class="result pop"><span class="mono">${esc(w.title)} · Latihan Ulang</span><h1>Latihan Selesai</h1>
+  <p style="margin:0">+${G.xp} XP · ${left?`Masih ada ${left} soal di daftar Latihan Ulang.`:"Daftar Latihan Ulang sudah kosong. Hebat!"}</p>${elemReport()}
+  <div class="row" style="justify-content:center">${left?`<button class="btn" id="rp">Latihan lagi</button>`:""}<button class="btn ghost" id="mp">Peta misi</button></div></section>`;
+  document.getElementById("bk").onclick=()=>world(G.wi);document.getElementById("mp").onclick=()=>world(G.wi);
+  if(left)document.getElementById("rp").onclick=()=>play(G.wi,"review");window.scrollTo(0,0);return;
+ }
+ const boss=G.mode==="boss",k=w.key+"-"+(boss?"boss":G.mi),s=starsFor(G.err);
+ const firstClear=!S.done[k],bonus=firstClear?(boss?60:20):0;S.xp+=bonus;S.done[k]=Math.max(s,S.done[k]||0);save();
+ const last=w.missions.length-1,nextOpen=!boss&&G.mi<last&&unlocked(w,G.mi+1),bossNow=!boss&&G.mi===last&&bossOpen(w);
+ const msg=s===3?"Sempurna! Kamu bekerja seperti profesional.":s===2?"Bagus! Misi berikutnya sudah terbuka. Ulangi untuk meraih 3 bintang.":"Misi selesai, tetapi perlu minimal 2 bintang untuk membuka misi berikutnya. Kerjakan Latihan Ulang, lalu coba lagi.";
+ app.innerHTML=`${topbar(w.title)}
+ <section class="result pop"><span class="mono">${esc(w.title)} · ${boss?"Boss Mission":`Misi ${G.mi+1} · ${LEVELS[G.mi].name}`}</span>
+ <h1>${boss?"Lulus Ujian Kerja":"Misi Selesai"}</h1><div class="stars" aria-label="${s} dari 3 bintang">${"★".repeat(s)}<span class="off">${"★".repeat(3-s)}</span></div>
+ <p style="margin:0">+${G.xp+bonus} XP${bonus?` (termasuk bonus pertama kali +${bonus})`:""} · Kesalahan: ${G.err}</p>
+ <p class="muted" style="margin:0;max-width:46ch">${msg}</p>${elemReport()}
+ ${boss?`<span class="badge">🏅 Sertifikat ${esc(w.title)} · ${esc(w.dept)}</span><p class="muted" style="margin:0">Sekarang kerjakan Tes Kemampuan lagi untuk melihat peningkatanmu.</p>`:""}
+ <div class="row" style="justify-content:center">${nextOpen?`<button class="btn" id="nm">Misi berikutnya →</button>`:""}${bossNow?`<button class="btn" id="nb">⚔️ Boss Mission</button>`:""}<button class="btn ghost" id="rp">Main lagi</button><button class="btn ghost" id="mp">Peta misi</button></div></section>`;
+ wire(nextOpen,bossNow);
+}
+function fail(){
+ const w=W[G.wi];
+ app.innerHTML=`${topbar(w.title)}
+ <section class="result fail pop"><span class="mono">${esc(w.title)} · ${G.mode==="boss"?"Boss Mission":`Misi ${G.mi+1} · ${LEVELS[G.mi].name}`}</span>
+ <h1>Misi Gagal</h1><p style="margin:0;font-size:40px">💔</p>
+ <p style="margin:0">Kamu menyelesaikan ${G.i} dari ${G.items.length} soal · XP tetap tersimpan: +${G.xp}</p>
+ <p class="muted" style="margin:0;max-width:46ch">Nyawamu habis. Soal yang salah sudah masuk Latihan Ulang. Kerjakan latihan itu dulu, lalu coba misi ini lagi.</p>
+ <div class="row" style="justify-content:center"><button class="btn" id="rp">Coba lagi</button><button class="btn ghost" id="rv">Latihan Ulang</button><button class="btn ghost" id="mp">Peta misi</button></div></section>`;
+ wire(false,false);document.getElementById("rv").onclick=()=>play(G.wi,"review");
+}
+function wire(nextOpen,bossNow){
+ document.getElementById("bk").onclick=()=>world(G.wi);
+ if(nextOpen)document.getElementById("nm").onclick=()=>play(G.wi,"mission",G.mi+1);
+ if(bossNow)document.getElementById("nb").onclick=()=>play(G.wi,"boss");
+ document.getElementById("rp").onclick=()=>G.mode==="boss"?play(G.wi,"boss"):play(G.wi,"mission",G.mi);
+ document.getElementById("mp").onclick=()=>world(G.wi);
+ window.scrollTo(0,0);
+}
+if(canSpeak)try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=()=>{}}catch(e){}
+home();
+
+</script>
