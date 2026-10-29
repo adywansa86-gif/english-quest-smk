@@ -168,6 +168,8 @@ h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1;text-wrap:balance;l
 .tool{display:flex;gap:12px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .tool:hover:not(:disabled){border-color:var(--w)}
 .tool:disabled{opacity:.55;cursor:not-allowed}
+.tool.must{border:2px solid var(--w);background:var(--surface2)}
+.tool.must b{color:var(--w)}
 .tool .ti{font-size:26px;flex:none}
 .tool > span:last-child{min-width:0}
 .tool b{display:block;font-size:16px}
@@ -725,9 +727,9 @@ const IDX={};
 W.forEach(w=>w.missions.forEach((m,mi)=>m.items.forEach((it,ii)=>{it.id=w.key+"."+mi+"."+ii;IDX[it.id]=it;})));
 const TESTABLE=["lis","mean","dlg","cloze","type","err","dict","arg"];
 const KEY="eq-smk-v3";
-let S={xp:0,done:{},el:{},wrong:{},tests:{},writes:{},name:""};
+let S={xp:0,done:{},el:{},wrong:{},tests:{},writes:{},place:{},name:""};
 try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r));}catch(e){}
-["done","el","wrong","tests","writes"].forEach(k=>{if(!S[k]||typeof S[k]!=="object")S[k]={}});
+["done","el","wrong","tests","writes","place"].forEach(k=>{if(!S[k]||typeof S[k]!=="object")S[k]={}});
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const app=document.getElementById("app");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -739,8 +741,12 @@ function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor
 function shuffleNot(a){let s=shuffle(a),n=0;while(s.join("|")===a.join("|")&&n++<12)s=shuffle(a);return s}
 function rank(x){return x>=2500?"Expert":x>=1500?"Senior Staff":x>=700?"Skilled Worker":x>=200?"Junior Staff":"Trainee"}
 const st=k=>S.done[k]||0;
-const unlocked=(w,i)=>i===0||st(w.key+"-"+(i-1))>=2;
-const bossOpen=w=>w.missions.every((m,i)=>st(w.key+"-"+i)>=2);
+const tested=w=>(S.tests[w.key]||[]).length>0;
+const placeOf=w=>S.place[w.key]||0;
+const unlocked=(w,i)=>tested(w)&&(i<=placeOf(w)||st(w.key+"-"+(i-1))>=2);
+const bossOpen=w=>tested(w)&&w.missions.every((m,i)=>i<Math.min(placeOf(w),4)||st(w.key+"-"+i)>=2);
+function placementFor(s){return s>=11?4:s>=10?3:s>=8?2:s>=6?1:0}
+const PLACE_RULE=[["0–5","Misi 1 · Rookie"],["6–7","Misi 2 · Starter"],["8–9","Misi 3 · Explorer"],["10","Misi 4 · Apprentice"],["11–12","Misi 5 · Technician"]];
 const lastTwo=w=>[...w.missions[w.missions.length-2].items,...w.missions[w.missions.length-1].items];
 const reviewIds=w=>Object.keys(S.wrong).filter(id=>id.startsWith(w.key+".")&&IDX[id]);
 function setW(w){document.documentElement.style.setProperty("--w",w?`var(--${w.key})`:"var(--tou)")}
@@ -767,7 +773,7 @@ function home(){
  <button class="report-btn" id="rep"><span>📊</span><span><b>Rapor Belajar</b><small>Lihat kemajuanmu per elemen CP, hasil tes, dan kirim ke guru</small></span></button>
  <section class="legend" aria-label="Level bahasa">${LEVELS.map((l,i)=>`<div><span class="mono">Misi ${i+1}</span><strong>${l.name}</strong><em>${l.grade}</em><span>${l.desc}. ${l.sup}.</span></div>`).join("")}</section>
  <section class="rules"><h3>Cara bermain supaya kemampuanmu naik</h3><ol>
-  <li><b>Kerjakan Tes Kemampuan dulu</b> di setiap jurusan. Ulangi tesnya setelah menamatkan misi untuk melihat kemajuanmu.</li>
+  <li><b>Tes Awal wajib dikerjakan</b> sebelum misi terbuka. Kalau skormu tinggi, kamu langsung bisa masuk ke misi yang lebih tinggi.</li><li>Setelah menamatkan misi, kerjakan <b>Tes Akhir</b> untuk melihat seberapa besar kemampuanmu meningkat.</li>
   <li>Selesaikan misi berurutan. Raih minimal ⭐⭐ untuk membuka misi berikutnya.</li>
   <li>Soal yang pernah salah masuk ke <b>Latihan Ulang</b>. Kerjakan sampai kosong.</li>
   <li>Di latihan berbicara, <b>ucapkan kalimat dengan suara keras</b>, jangan hanya dibaca dalam hati.</li>
@@ -777,7 +783,7 @@ function home(){
  app.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>world(+b.dataset.w));
  document.getElementById("rep").onclick=report;
  const r=document.getElementById("reset");let armed=false;
- r.onclick=()=>{if(!armed){armed=true;r.textContent="Yakin? Klik sekali lagi untuk menghapus semua progres";return}const nm=S.name;S={xp:0,done:{},el:{},wrong:{},tests:{},writes:{},name:nm};save();home()};
+ r.onclick=()=>{if(!armed){armed=true;r.textContent="Yakin? Klik sekali lagi untuk menghapus semua progres";return}const nm=S.name;S={xp:0,done:{},el:{},wrong:{},tests:{},writes:{},place:{},name:nm};save();home()};
  window.scrollTo(0,0);
 }
 
@@ -789,17 +795,17 @@ function world(wi){
  app.innerHTML=`${topbar("Semua jurusan")}
  <header class="whead"><span class="big" aria-hidden="true">${w.ico}</span><span class="mono">${esc(w.dept)} · ${esc(w.place)}</span><h1>${esc(w.title)}</h1><p>${esc(w.intro)}</p></header>
  <section class="tools">
-  <button class="tool" id="t-test"><span class="ti">📝</span><span><b>Tes Kemampuan</b><small>${testSummary(w)}</small></span></button>
+  <button class="tool${tested(w)?"":" must"}" id="t-test"><span class="ti">📝</span><span><b>${tested(w)?"Tes Kemampuan":"Mulai di sini: Tes Awal"}</b><small>${tested(w)?testSummary(w)+` · mulai dari Misi ${placeOf(w)+1}`:"Wajib dikerjakan sebelum misi terbuka"}</small></span></button>
   <button class="tool" id="t-rev" ${nRev?"":"disabled"}><span class="ti">🔁</span><span><b>Latihan Ulang</b><small>${nRev?`${nRev} soal yang pernah salah`:"Belum ada soal yang salah"}</small></span></button>
   <button class="tool" id="t-glo"><span class="ti">📖</span><span><b>Kamus Kerja</b><small>${GLOSS[w.key].length} istilah dengan audio</small></span></button>
   <button class="tool" id="t-rp"><span class="ti">🎭</span><span><b>Kartu Role-Play</b><small>Latihan berbicara berpasangan di kelas</small></span></button>
  </section>
  <section class="missions">${w.missions.map((m,i)=>{const k=w.key+"-"+i,open=unlocked(w,i),lv=LEVELS[i];
   return `<button class="mission" data-m="${i}" ${open?"":"disabled"}><div class="lv">${i+1}<small>${lv.name.toUpperCase()}</small></div>
-  <div><h3>${esc(m.title)}</h3><p>${esc(m.en)} · ${open?`${lv.grade} · ${m.items.length} soal${lv.lives?` · ${lv.lives} nyawa`:""}`:"🔒 Raih minimal 2 bintang di misi sebelumnya"}</p></div>
+  <div><h3>${esc(m.title)}</h3><p>${esc(m.en)} · ${open?`${lv.grade} · ${m.items.length} soal${lv.lives?` · ${lv.lives} nyawa`:""}${i<placeOf(w)&&!st(k)?" · boleh dilewati":""}`:!tested(w)?"🔒 Kerjakan Tes Awal dulu":"🔒 Raih minimal 2 bintang di misi sebelumnya"}</p></div>
   <div class="st" aria-label="${st(k)} bintang">${stars(k)}</div></button>`}).join("")}
   <button class="mission boss" id="boss" ${bossOpen(w)?"":"disabled"}><div class="lv">⚔️<small>BOSS</small></div>
-  <div><h3>Ujian Kerja ${esc(w.title)}</h3><p>${bossOpen(w)?"10 soal acak tersulit · 3 nyawa · waktu terbatas":"🔒 Raih minimal 2 bintang di semua misi"}</p></div>
+  <div><h3>Ujian Kerja ${esc(w.title)}</h3><p>${bossOpen(w)?"10 soal acak tersulit · 3 nyawa · waktu terbatas":!tested(w)?"🔒 Kerjakan Tes Awal dulu":"🔒 Raih minimal 2 bintang di semua misi yang wajib"}</p></div>
   <div class="st">${stars(w.key+"-boss")}</div></button></section>`;
  document.getElementById("bk").onclick=home;
  app.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>play(wi,"mission",+b.dataset.m));
@@ -843,19 +849,19 @@ function report(){
  const elRows=ELEMS.map(e=>{const p=pct(S.el[e]),o=S.el[e]||{n:0,f:0};return `<div class="elrow"><span>${e}</span><span class="elbar"><i style="width:${p||0}%"></i></span><b>${p===null?"–":p+"%"}</b><small>${o.f}/${o.n} soal</small></div>`}).join("");
  const weak=ELEMS.filter(e=>S.el[e]&&S.el[e].n>=4).sort((a,b)=>pct(S.el[a])-pct(S.el[b]))[0];
  const rows=W.map(w=>{const n=w.missions.filter((m,j)=>st(w.key+"-"+j)>0).length,stars=w.missions.reduce((s,m,j)=>s+st(w.key+"-"+j),0);
-  return `<tr><td><b>${esc(w.title)}</b><br><small>${esc(w.dept)}</small></td><td>${n}/${w.missions.length}</td><td>${stars}/18</td><td>${st(w.key+"-boss")?"Lulus":"–"}</td><td>${(S.tests[w.key]||[]).length?testSummary(w):"–"}</td><td>${reviewIds(w).length}</td></tr>`}).join("");
+  return `<tr><td><b>${esc(w.title)}</b><br><small>${esc(w.dept)}</small></td><td>${n}/${w.missions.length}</td><td>${stars}/18</td><td>${st(w.key+"-boss")?"Lulus":"–"}</td><td>${(S.tests[w.key]||[]).length?testSummary(w):"–"}</td><td>${tested(w)?"Misi "+(placeOf(w)+1):"–"}</td><td>${reviewIds(w).length}</td></tr>`}).join("");
  app.innerHTML=`${topbar("Kembali")}
  <section class="panel"><span class="mono">Rapor belajar</span><h1 class="ph">Kemajuanmu</h1>
  <label class="lbl" for="nm">Nama siswa & kelas</label><input class="inp" id="nm" type="text" placeholder="Contoh: Dewi, XI Akuntansi 1" value="${esc(S.name||"")}">
  <div class="kpis"><div><b>${S.xp}</b><span>Total XP</span></div><div><b>${rank(S.xp)}</b><span>Peringkat</span></div><div><b>${Object.keys(S.writes).length}</b><span>Tulisan selesai</span></div></div></section>
  <section class="panel"><h3 class="h3">Ketepatan per elemen Capaian Pembelajaran</h3><p class="muted">Persentase soal yang dijawab benar pada percobaan pertama.</p>${elRows}
  ${weak?`<p class="tipbox">💡 Elemen yang paling perlu dilatih: <b>${weak}</b>. ${weak.startsWith("Menyimak")?"Perbanyak latihan dikte, listening, dan kartu role-play.":weak.startsWith("Membaca")?"Kerjakan ulang soal bacaan teks kerja dan perhatikan pertanyaan tersirat.":"Perbanyak menyusun kalimat, mengetik jawaban, dan tugas menulis."}</p>`:""}</section>
- <section class="panel"><h3 class="h3">Per jurusan</h3><div class="tblw"><table><tr><th>Jurusan</th><th>Misi</th><th>Bintang</th><th>Boss</th><th>Tes kemampuan</th><th>Perlu diulang</th></tr>${rows}</table></div></section>
+ <section class="panel"><h3 class="h3">Per jurusan</h3><div class="tblw"><table><tr><th>Jurusan</th><th>Misi</th><th>Bintang</th><th>Boss</th><th>Tes kemampuan</th><th>Mulai dari</th><th>Perlu diulang</th></tr>${rows}</table></div></section>
  <section class="panel"><h3 class="h3">Kirim ke guru</h3><p class="muted">Salin ringkasan rapor dan semua tulisanmu, lalu kirim lewat WhatsApp atau email ke guru.</p>
  <div class="row"><button class="btn" id="cp">Salin rapor & tulisan</button></div></section>
  <section class="panel"><h3 class="h3">Panduan untuk guru</h3><ol class="guide">
-  <li><b>Minggu 1:</b> siswa mengerjakan Tes Kemampuan di jurusannya (tes awal). Catat skornya.</li>
-  <li><b>Minggu 2–6:</b> 1–2 misi per minggu (±20 menit). Mulai dari Rookie bila skor tes awal di bawah 6/12.</li>
+  <li><b>Minggu 1:</b> siswa wajib mengerjakan Tes Awal di jurusannya. Skor menentukan misi pertama yang terbuka (penempatan otomatis). Catat skornya.</li>
+  <li><b>Minggu 2–6:</b> 1–2 misi per minggu (±20 menit), dimulai dari misi hasil penempatan.</li>
   <li><b>Setiap pekan:</b> satu sesi Kartu Role-Play berpasangan (10 menit), dinilai dengan rubrik.</li>
   <li><b>Misi Professional:</b> nilai tulisan siswa (email/laporan) yang mereka kirimkan.</li>
   <li><b>Minggu terakhir:</b> tes akhir. Bandingkan dengan tes awal dan lihat elemen CP yang masih lemah di rapor.</li></ol>
@@ -880,13 +886,16 @@ function testIntro(wi){
  const w=W[wi];setW(w);const t=S.tests[w.key]||[];
  app.innerHTML=`${topbar(w.title)}
  <section class="result"><span class="mono">${esc(w.title)} · Tes Kemampuan</span><h1>${t.length?"Tes Akhir":"Tes Awal"}</h1>
- <p style="margin:0;max-width:48ch">12 soal acak dari semua level (dasar sampai Fase E–F). Tidak ada petunjuk dan jawaban tidak ditunjukkan sampai tes selesai. Kerjakan dengan jujur supaya hasilnya menunjukkan kemampuan aslimu.</p>
+ <p style="margin:0;max-width:48ch">12 soal acak, 2 soal dari setiap level (dasar sampai Fase E–F). Tidak ada petunjuk dan jawaban tidak ditunjukkan sampai tes selesai. ${t.length?"Tes ini mengukur peningkatan kemampuanmu dibanding tes awal.":"Tes awal wajib dikerjakan. Hasilnya menentukan misi mana yang langsung terbuka untukmu, jadi kerjakan dengan jujur."}</p>
+ <div class="tblw" style="max-width:360px;width:100%"><table><tr><th>Skor</th><th>Langsung terbuka sampai</th></tr>${PLACE_RULE.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join("")}</table></div>
+ <p class="muted" style="margin:0;max-width:48ch">Misi 6 (Professional) dan Boss Mission selalu harus diraih lewat permainan.</p>
  ${t.length?`<p class="muted" style="margin:0">Riwayat: ${t.map((x,i)=>`${i===0?"Awal":"Tes "+(i+1)} ${x.s}/${x.t}`).join(" · ")}</p>`:""}
  <div class="row" style="justify-content:center"><button class="btn" id="go">Mulai tes</button><button class="btn ghost" id="mp">Kembali</button></div></section>`;
  document.getElementById("bk").onclick=()=>world(wi);document.getElementById("mp").onclick=()=>world(wi);
  document.getElementById("go").onclick=()=>play(wi,"test");
 }
 function buildTest(w){let out=[];w.missions.forEach(m=>{out.push(...shuffle(m.items.filter(x=>TESTABLE.includes(x.t))).slice(0,2))});return shuffle(out)}
+const levelOf=it=>+it.id.split(".")[1];
 
 /* ---------- PLAY ---------- */
 let G=null;const cur=()=>G.items[G.i];
@@ -992,7 +1001,7 @@ function startTimer(sec){
   if(left<=0){clearTimer();miss("Waktu habis! Satu nyawa hilang. Coba jawab lagi.",true);if(!G.done&&G.lives>0)startTimer(sec)}},1000);
 }
 function disableAll(){app.querySelectorAll(".tk-b button.opt,.tk-b .tile,.tk-b .inp,.tk-b form button,#chk,#clr").forEach(x=>{x.disabled=true;if(x.tagName==="INPUT")x.readOnly=true})}
-function testAnswer(ok){G.done=true;if(ok)G.correct++;disableAll();showNext("",`<div class="fb"><strong>Jawaban tercatat.</strong><span>Hasilnya ditampilkan setelah tes selesai.</span></div>`)}
+function testAnswer(ok){G.done=true;if(ok)G.correct++;const L=levelOf(cur());G.byLv=G.byLv||{};G.byLv[L]=G.byLv[L]||[0,0];G.byLv[L][1]++;if(ok)G.byLv[L][0]++;disableAll();showNext("",`<div class="fb"><strong>Jawaban tercatat.</strong><span>Hasilnya ditampilkan setelah tes selesai.</span></div>`)}
 
 /* ---------- ANSWER HANDLERS ---------- */
 function bindChoose(it){
@@ -1111,11 +1120,14 @@ function finish(){
  if(G.mode==="test"){
   const list=S.tests[w.key]=S.tests[w.key]||[];list.push({s:G.correct,t:G.items.length,d:new Date().toLocaleDateString("id-ID")});save();
   const first=list[0],diff=G.correct-first.s,p=Math.round(G.correct/G.items.length*100);
-  const advice=p<50?"Mulailah dari misi Rookie dan Starter untuk menguatkan dasar.":p<75?"Fokus pada misi Apprentice dan Technician.":"Kamu siap untuk misi Professional dan Boss Mission.";
+  const before=placeOf(w),newPlace=Math.max(before,placementFor(G.correct));S.place[w.key]=newPlace;save();
+  const advice=list.length===1?`Kamu langsung bisa mulai dari <b>Misi ${newPlace+1} · ${LEVELS[newPlace].name}</b>.${newPlace>0?" Misi di bawahnya tetap terbuka bila ingin mengulang dasar.":" Kuatkan dasarmu dulu, lalu naik level satu per satu."}`:newPlace>before?`Hasil ini membuka misi baru sampai <b>Misi ${newPlace+1} · ${LEVELS[newPlace].name}</b>.`:"Teruskan misi berikutnya untuk menaikkan kemampuanmu.";
+  const lvRows=LEVELS.map((l,i)=>{const r=(G.byLv||{})[i]||[0,0];return r[1]?`<tr><td>${i+1}. ${l.name}</td><td>${l.grade}</td><td>${r[0]}/${r[1]}</td></tr>`:""}).join("");
   app.innerHTML=`${topbar(w.title)}<section class="result pop"><span class="mono">${esc(w.title)} · Tes Kemampuan ${list.length===1?"Awal":"ke-"+list.length}</span>
   <h1>${G.correct}/${G.items.length}</h1><p style="margin:0;font-size:20px;font-weight:700">Skor ${p}</p>
   ${list.length>1?`<p class="badge">${diff>0?`📈 Naik ${diff} poin dari tes awal`:diff===0?"Sama dengan tes awal":`Turun ${-diff} poin dari tes awal`}</p>`:""}
-  <p class="muted" style="margin:0;max-width:46ch">${advice}</p>
+  <p style="margin:0;max-width:46ch">${advice}</p>
+  <div class="tblw" style="max-width:420px;width:100%"><table><tr><th>Level</th><th>Setara</th><th>Benar</th></tr>${lvRows}</table></div>
   <div class="row" style="justify-content:center"><button class="btn" id="mp">Ke peta misi</button></div></section>`;
   document.getElementById("bk").onclick=()=>world(G.wi);document.getElementById("mp").onclick=()=>world(G.wi);window.scrollTo(0,0);return;
  }
